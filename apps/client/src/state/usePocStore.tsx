@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo, useState } from 'react'
 import type { CompileResult, GameState, RuleFired } from 'shared-types'
+import type { TurnLogEntry } from '../sim/engine'
 
 type PocStore = {
   doctrineText: string
@@ -11,6 +12,8 @@ type PocStore = {
   setRulesFired: (value: RuleFired[]) => void
   simState: GameState | null
   setSimState: (value: GameState | null) => void
+  turnLog: TurnLogEntry[]
+  setTurnLog: (value: TurnLogEntry[]) => void
 }
 
 const PocStoreContext = createContext<PocStore | undefined>(undefined)
@@ -24,6 +27,7 @@ export const PocStoreProvider = ({ children }: PocStoreProviderProps) => {
   const [compileResult, setCompileResult] = useState<CompileResult | null>(null)
   const [rulesFired, setRulesFired] = useState<RuleFired[]>([])
   const [simState, setSimState] = useState<GameState | null>(null)
+  const [turnLog, setTurnLog] = useState<TurnLogEntry[]>([])
 
   const value = useMemo(
     () => ({
@@ -35,8 +39,10 @@ export const PocStoreProvider = ({ children }: PocStoreProviderProps) => {
       setRulesFired,
       simState,
       setSimState,
+      turnLog,
+      setTurnLog,
     }),
-    [doctrineText, compileResult, rulesFired, simState],
+    [doctrineText, compileResult, rulesFired, simState, turnLog],
   )
 
   return <PocStoreContext.Provider value={value}>{children}</PocStoreContext.Provider>

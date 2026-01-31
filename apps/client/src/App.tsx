@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CompileResult, PolicyComplexity } from 'shared-types'
 import { ResourceType } from 'shared-types'
 import ComplexityMeter from './components/ComplexityMeter'
 import DoctrineEditor, { type DoctrineTemplate, type EditorStatus } from './components/DoctrineEditor'
+import GameScene from './components/GameScene'
 import PolicyPreview from './components/PolicyPreview'
 import RulesFiredList from './components/RulesFiredList'
 import RunTrialButton, { type TrialStatus } from './components/RunTrialButton'
+import TurnLog from './components/TurnLog'
+import VictoryPanel from './components/VictoryPanel'
 import { compileDoctrine } from './lib/compilerStub'
 import { runSimulation } from './sim/engine'
 import { createSingleFactionState, DEFAULT_POC_SEED, POC_PLAYER_ID } from './sim/scenarios/singleFaction'
@@ -71,6 +74,8 @@ function App() {
     setRulesFired,
     simState,
     setSimState,
+    turnLog,
+    setTurnLog,
   } = usePocStore()
 
   useEffect(() => {
@@ -115,6 +120,7 @@ function App() {
     setCompileResult(null)
     setRulesFired([])
     setSimState(null)
+    setTurnLog([])
     setTrialStatus('idle')
     setTrialSummary(undefined)
     setStatus({ status: 'idle', message: 'Template loaded. Ready to lint or compile.' })
@@ -127,6 +133,7 @@ function App() {
     }
     setRulesFired([])
     setSimState(null)
+    setTurnLog([])
     setTrialStatus('idle')
     setTrialSummary(undefined)
     setStatus(DEFAULT_STATUS)
@@ -166,6 +173,7 @@ function App() {
     const result = compileDoctrine(trimmed)
     setRulesFired([])
     setSimState(null)
+    setTurnLog([])
     setTrialStatus('idle')
     setTrialSummary(undefined)
     if (result.errors?.length) {
@@ -225,6 +233,7 @@ function App() {
 
       setSimState(simulation.finalState)
       setRulesFired(simulation.rulesFired)
+      setTurnLog(simulation.turnLog)
       setTrialStatus('complete')
 
       const vp = simulation.finalState.victory_points[POC_PLAYER_ID] ?? 0
@@ -235,6 +244,9 @@ function App() {
   }
 
   const complexity = compileResult?.complexity ?? FALLBACK_COMPLEXITY
+  const fallbackState = useMemo(() => createSingleFactionState(DEFAULT_POC_SEED), [])
+  const sceneUnits = simState?.units ?? fallbackState.units
+  const sceneSeed = simState?.seed ?? DEFAULT_POC_SEED
 
   return (
     <div className={`app layout-${layout}`}>
@@ -284,25 +296,29 @@ function App() {
 
         <section className="panel game-panel">
           <div className="game-stage">
-            <div className="game-stage__label">Game View</div>
-            <div className="game-stage__canvas">
-              <div className="game-grid" />
-            </div>
+          <div className="game-stage__label">Game View</div>
+          <div className="game-stage__canvas">
+              <GameScene seed={sceneSeed} units={sceneUnits} />
           </div>
-          <div className="game-stage__hint">
-            Client-only, non-authoritative preview. Babylon scene and hex grid will render here once the engine is wired.
+        </div>
+        <div className="game-stage__hint">
+          Client-only, non-authoritative preview. Babylon scene and hex grid will render here once the engine is wired.
+        </div>
+        <RunTrialButton status={trialStatus} onRun={handleRunTrial} summary={trialSummary} />
+        {simState ? (
+          <div className="trial-metadata">
+            <div>Seed: {simState.seed}</div>
+            <div>Turn: {simState.turn} / {simState.max_turns}</div>
+            <div>VP: {simState.victory_points[POC_PLAYER_ID] ?? 0}</div>
           </div>
-          <RunTrialButton status={trialStatus} onRun={handleRunTrial} summary={trialSummary} />
-          {simState ? (
-            <div className="trial-metadata">
-              <div>Seed: {simState.seed}</div>
-              <div>Turn: {simState.turn} / {simState.max_turns}</div>
-              <div>VP: {simState.victory_points[POC_PLAYER_ID] ?? 0}</div>
-            </div>
-          ) : (
-            <div className="trial-metadata empty">No trial run yet.</div>
-          )}
-        </section>
+        ) : (
+          <div className="trial-metadata empty">No trial run yet.</div>
+        )}
+        <div className="game-panels">
+          <VictoryPanel state={simState} />
+          <TurnLog entries={turnLog} />
+        </div>
+      </section>
       </main>
     </div>
   )

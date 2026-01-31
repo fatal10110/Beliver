@@ -45,7 +45,7 @@ export const applyAction = (state: GameState, action: Action): GameState => {
         })
       } else {
         resources = applyResourceDelta(resources, {
-          [ResourceType.Faith]: 2,
+          [ResourceType.Faith]: 1,
           [ResourceType.Devotion]: 2,
           [ResourceType.Wood]: -2,
         })

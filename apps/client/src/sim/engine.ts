@@ -1,12 +1,29 @@
-import type { Action, DoctrinePolicy, GameState, RuleFired } from 'shared-types'
+import type { Action, DoctrinePolicy, GameState, ResourceStockpile, RuleFired } from 'shared-types'
 import { ActionType, ResourceType, UnitType } from 'shared-types'
 import { applyAction } from './actions'
 import { validateAction } from './validators'
+
+export type VictoryPointBreakdown = {
+  total: number
+  faith: number
+  devotion: number
+  food: number
+  wood: number
+  units: number
+}
+
+export type TurnLogEntry = {
+  turn: number
+  action: Action
+  resources: ResourceStockpile
+  victoryPoints: number
+}
 
 export type SimulationResult = {
   finalState: GameState
   actions: Action[]
   rulesFired: RuleFired[]
+  turnLog: TurnLogEntry[]
 }
 
 type SimulationConfig = {
@@ -135,16 +152,24 @@ const evaluatePolicy = (state: GameState, policy: DoctrinePolicy, rng: () => num
   return { actionName: fallback, rule: undefined }
 }
 
-const calculateVictoryPoints = (state: GameState) => {
+export const calculateVictoryPointsBreakdown = (state: GameState): VictoryPointBreakdown => {
   const resources = state.resources
-  return (
-    resources[ResourceType.Faith] * 2 +
-    resources[ResourceType.Devotion] * 2 +
-    resources[ResourceType.Food] +
-    resources[ResourceType.Wood] +
-    state.units.length * 3
-  )
+  const faith = resources[ResourceType.Faith] * 2
+  const devotion = resources[ResourceType.Devotion] * 2
+  const food = resources[ResourceType.Food]
+  const wood = resources[ResourceType.Wood]
+  const units = state.units.length * 3
+  return {
+    total: faith + devotion + food + wood + units,
+    faith,
+    devotion,
+    food,
+    wood,
+    units,
+  }
 }
+
+const calculateVictoryPoints = (state: GameState) => calculateVictoryPointsBreakdown(state).total
 
 const cloneState = (state: GameState): GameState => ({
   ...state,
@@ -159,6 +184,7 @@ export const runSimulation = ({ initialState, policy, playerId, turnLimit }: Sim
   const rng = createRng(current.seed)
   const rulesFired: RuleFired[] = []
   const actions: Action[] = []
+  const turnLog: TurnLogEntry[] = []
 
   for (let turn = current.turn + 1; turn <= limit; turn += 1) {
     const { actionName, rule } = evaluatePolicy(current, policy, rng)
@@ -166,12 +192,14 @@ export const runSimulation = ({ initialState, policy, playerId, turnLimit }: Sim
     const finalAction = validateAction(current, proposed) ? proposed : { type: ActionType.Wait }
 
     let next = applyAction(current, finalAction)
+    const breakdown = calculateVictoryPointsBreakdown(next)
+    const victoryPoints = breakdown.total
     next = {
       ...next,
       turn,
       victory_points: {
         ...next.victory_points,
-        [playerId]: calculateVictoryPoints(next),
+        [playerId]: victoryPoints,
       },
     }
 
@@ -186,8 +214,14 @@ export const runSimulation = ({ initialState, policy, playerId, turnLimit }: Sim
     }
 
     actions.push(finalAction)
+    turnLog.push({
+      turn,
+      action: finalAction,
+      resources: { ...next.resources },
+      victoryPoints,
+    })
     current = next
   }
 
-  return { finalState: current, actions, rulesFired }
+  return { finalState: current, actions, rulesFired, turnLog }
 }
