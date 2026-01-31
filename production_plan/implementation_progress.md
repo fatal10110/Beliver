@@ -49,6 +49,7 @@ This document tracks the high-level completion status of the project. It must be
 *   **2026-01-31**: Implemented Phase 0 compiler stub, deterministic client simulation, and trial run UI plumbing.
 *   **2026-01-31**: Added Phase 0 hex-grid visual map preview plus VP breakdown and deterministic turn log panels.
 *   **2026-01-31**: Added Phase 0 single-faction content data (Abrim, units, buildings) and wired sim costs/yields to it.
+*   **2026-01-31**: Fixed client dev import of `shared-types` by aliasing the source module for Vite/TS.
 
 ## Technical Debt & Constraints
 *   **Prisma Generation**: Client is generated to `src/generated/client` instead of `node_modules`. This is a workaround for Monorepo/NestJS build issues. Long-term fix required.
