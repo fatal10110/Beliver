@@ -46,6 +46,7 @@ This document tracks the high-level completion status of the project. It must be
 *   **2026-01-31**: Aligned Production Plan to hybrid services (Platform + Simulation + Compiler) and doctrine-first loop.
 *   **2026-01-31**: Added Simulation + Compiler stubs, shared schemas, and docker-compose services for local dev.
 *   **2026-01-31**: Added Phase 0 doctrine editor layout, debug UI scaffolding, and expanded shared types for doctrine policy contracts.
+*   **2026-01-31**: Implemented Phase 0 compiler stub, deterministic client simulation, and trial run UI plumbing.
 
 ## Technical Debt & Constraints
 *   **Prisma Generation**: Client is generated to `src/generated/client` instead of `node_modules`. This is a workaround for Monorepo/NestJS build issues. Long-term fix required.

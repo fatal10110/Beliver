@@ -1,9 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import type { DoctrinePolicy, PolicyComplexity, RuleFired } from 'shared-types'
+import { useEffect, useRef, useState } from 'react'
+import type { CompileResult, PolicyComplexity } from 'shared-types'
+import { ResourceType } from 'shared-types'
 import ComplexityMeter from './components/ComplexityMeter'
 import DoctrineEditor, { type DoctrineTemplate, type EditorStatus } from './components/DoctrineEditor'
 import PolicyPreview from './components/PolicyPreview'
 import RulesFiredList from './components/RulesFiredList'
+import RunTrialButton, { type TrialStatus } from './components/RunTrialButton'
+import { compileDoctrine } from './lib/compilerStub'
+import { runSimulation } from './sim/engine'
+import { createSingleFactionState, DEFAULT_POC_SEED, POC_PLAYER_ID } from './sim/scenarios/singleFaction'
+import { usePocStore } from './state/usePocStore'
 import './App.css'
 
 type LayoutMode = 'editor' | 'game' | 'split'
@@ -34,95 +40,57 @@ const TEMPLATES: DoctrineTemplate[] = [
   },
 ]
 
-const SAMPLE_POLICY: DoctrinePolicy = {
-  policy_id: 'poc-abrim-001',
-  policy_schema_version: '0.1.0',
-  engine_version: 'poc-0.1.0',
-  weights: {
-    build_farm: 0.75,
-    build_mine: 0.6,
-    train_guardian: 0.45,
-  },
-  rules: [
-    {
-      id: 'rule-1',
-      name: 'Harvest Priority',
-      condition: 'food < 10',
-      action: 'build_farm',
-      weight: 0.8,
-      priority: 1,
-    },
-    {
-      id: 'rule-2',
-      name: 'Devotion Stabilizer',
-      condition: 'devotion < 6',
-      action: 'pray',
-      weight: 0.6,
-      priority: 2,
-    },
-    {
-      id: 'rule-3',
-      name: 'Militia Growth',
-      condition: 'units < 4',
-      action: 'train_guardian',
-      weight: 0.5,
-      priority: 3,
-    },
-  ],
-  complexity_usage: 18,
-  seeded_personality: 12,
-}
-
-const SAMPLE_COMPLEXITY: PolicyComplexity = {
-  score: 18,
-  budget: 40,
-}
-
-const SAMPLE_RULES: RuleFired[] = [
-  {
-    rule_id: 'rule-1',
-    rule_name: 'Harvest Priority',
-    turn: 1,
-    weight: 0.8,
-    summary: 'Food below 10, queued farm build.',
-  },
-  {
-    rule_id: 'rule-2',
-    rule_name: 'Devotion Stabilizer',
-    turn: 2,
-    weight: 0.6,
-    summary: 'Devotion low, initiated prayer cycle.',
-  },
-  {
-    rule_id: 'rule-3',
-    rule_name: 'Militia Growth',
-    turn: 4,
-    weight: 0.5,
-    summary: 'Units below threshold, training guardian.',
-  },
-]
-
 const DEFAULT_STATUS: StatusConfig = {
   status: 'idle',
   message: 'Awaiting doctrine input.',
 }
 
+const FALLBACK_COMPLEXITY: PolicyComplexity = {
+  score: 0,
+  budget: 40,
+}
+
+const formatResources = (resources: Record<ResourceType, number>) =>
+  `Faith ${resources[ResourceType.Faith]} | Food ${resources[ResourceType.Food]} | Wood ${resources[ResourceType.Wood]} | Devotion ${resources[ResourceType.Devotion]}`
+
 function App() {
   const [layout, setLayout] = useState<LayoutMode>('split')
   const [activeTemplateId, setActiveTemplateId] = useState(TEMPLATES[0].id)
-  const [doctrine, setDoctrine] = useState(TEMPLATES[0].snippet)
   const [status, setStatus] = useState<StatusConfig>(DEFAULT_STATUS)
+  const [trialStatus, setTrialStatus] = useState<TrialStatus>('idle')
+  const [trialSummary, setTrialSummary] = useState<string>()
   const timeoutRef = useRef<number | null>(null)
+  const runTimeoutRef = useRef<number | null>(null)
+
+  const {
+    doctrineText,
+    setDoctrineText,
+    compileResult,
+    setCompileResult,
+    rulesFired,
+    setRulesFired,
+    simState,
+    setSimState,
+  } = usePocStore()
+
+  useEffect(() => {
+    if (!doctrineText) {
+      setDoctrineText(TEMPLATES[0].snippet)
+    }
+  }, [doctrineText, setDoctrineText])
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         window.clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+      if (runTimeoutRef.current) {
+        window.clearTimeout(runTimeoutRef.current)
+        runTimeoutRef.current = null
       }
     }
   }, [])
-
-  const activePolicy = useMemo(() => SAMPLE_POLICY, [])
 
   const queueStatus = (nextStatus: StatusConfig, settleStatus?: StatusConfig) => {
     if (timeoutRef.current) {
@@ -143,37 +111,130 @@ function App() {
   const handleTemplateChange = (templateId: string) => {
     const template = TEMPLATES.find((item) => item.id === templateId)
     setActiveTemplateId(templateId)
-    setDoctrine(template?.snippet ?? '')
+    setDoctrineText(template?.snippet ?? '')
+    setCompileResult(null)
+    setRulesFired([])
+    setSimState(null)
+    setTrialStatus('idle')
+    setTrialSummary(undefined)
     setStatus({ status: 'idle', message: 'Template loaded. Ready to lint or compile.' })
   }
 
+  const handleDoctrineChange = (value: string) => {
+    setDoctrineText(value)
+    if (compileResult) {
+      setCompileResult(null)
+    }
+    setRulesFired([])
+    setSimState(null)
+    setTrialStatus('idle')
+    setTrialSummary(undefined)
+    setStatus(DEFAULT_STATUS)
+  }
+
   const handleLint = () => {
-    const trimmed = doctrine.trim()
+    const trimmed = doctrineText.trim()
     if (!trimmed) {
       queueStatus({ status: 'error', message: 'Doctrine is empty. Add at least one rule.' })
       return
     }
 
-    const result: StatusConfig =
-      trimmed.length < 40
-        ? { status: 'error', message: 'Doctrine is too brief. Add more conditions.' }
-        : { status: 'success', message: 'Lint passed. Ready to compile.' }
+    const lintResult = compileDoctrine(trimmed)
+    if (lintResult.errors?.length) {
+      queueStatus({ status: 'error', message: lintResult.errors[0] })
+      return
+    }
 
-    queueStatus({ status: 'linting', message: 'Linting scripture for clarity.' }, result)
+    if (lintResult.warnings?.length) {
+      queueStatus({ status: 'linting', message: 'Linting scripture for clarity.' }, {
+        status: 'success',
+        message: `Lint passed with ${lintResult.warnings.length} warning(s).`,
+      })
+      return
+    }
+
+    queueStatus({ status: 'linting', message: 'Linting scripture for clarity.' }, { status: 'success', message: 'Lint passed. Ready to compile.' })
   }
 
   const handleCompile = () => {
-    const trimmed = doctrine.trim()
+    const trimmed = doctrineText.trim()
     if (!trimmed) {
       queueStatus({ status: 'error', message: 'Nothing to compile. Start with a template.' })
       return
     }
 
+    const result = compileDoctrine(trimmed)
+    setRulesFired([])
+    setSimState(null)
+    setTrialStatus('idle')
+    setTrialSummary(undefined)
+    if (result.errors?.length) {
+      setCompileResult(result)
+      queueStatus({ status: 'error', message: result.errors[0] })
+      return
+    }
+
+    setCompileResult(result)
+
     queueStatus(
       { status: 'compiling', message: 'Compiling doctrine into a deterministic policy.' },
-      { status: 'success', message: 'Compiled stub policy. Preview updated.' },
+      {
+        status: 'success',
+        message: result.warnings?.length
+          ? `Compiled with ${result.warnings.length} warning(s).`
+          : 'Compiled stub policy. Preview updated.',
+      },
     )
   }
+
+  const resolveCompileResult = (): CompileResult | null => {
+    if (compileResult) {
+      return compileResult
+    }
+    const trimmed = doctrineText.trim()
+    if (!trimmed) {
+      return null
+    }
+    const result = compileDoctrine(trimmed)
+    setCompileResult(result)
+    return result
+  }
+
+  const handleRunTrial = () => {
+    if (runTimeoutRef.current) {
+      window.clearTimeout(runTimeoutRef.current)
+      runTimeoutRef.current = null
+    }
+
+    const result = resolveCompileResult()
+    if (!result || result.errors?.length) {
+      setStatus({ status: 'error', message: result?.errors?.[0] ?? 'Compile doctrine before running a trial.' })
+      return
+    }
+
+    setTrialStatus('running')
+    setTrialSummary('Simulating 50 turns with deterministic seed...')
+
+    runTimeoutRef.current = window.setTimeout(() => {
+      const initialState = createSingleFactionState(DEFAULT_POC_SEED)
+      const simulation = runSimulation({
+        initialState,
+        policy: result.policy,
+        playerId: POC_PLAYER_ID,
+      })
+
+      setSimState(simulation.finalState)
+      setRulesFired(simulation.rulesFired)
+      setTrialStatus('complete')
+
+      const vp = simulation.finalState.victory_points[POC_PLAYER_ID] ?? 0
+      const resourceSummary = formatResources(simulation.finalState.resources)
+      setTrialSummary(`Complete: ${simulation.finalState.turn} turns | VP ${vp} | ${resourceSummary}`)
+      runTimeoutRef.current = null
+    }, 350)
+  }
+
+  const complexity = compileResult?.complexity ?? FALLBACK_COMPLEXITY
 
   return (
     <div className={`app layout-${layout}`}>
@@ -204,8 +265,8 @@ function App() {
       <main className="app-main">
         <section className="panel editor-panel">
           <DoctrineEditor
-            value={doctrine}
-            onChange={setDoctrine}
+            value={doctrineText}
+            onChange={handleDoctrineChange}
             templates={TEMPLATES}
             activeTemplateId={activeTemplateId}
             onTemplateChange={handleTemplateChange}
@@ -215,9 +276,9 @@ function App() {
             statusMessage={status.message}
           />
           <div className="debug-grid">
-            <ComplexityMeter complexity={SAMPLE_COMPLEXITY} />
-            <PolicyPreview policy={activePolicy} policyHash="poc-4e7a" />
-            <RulesFiredList rules={SAMPLE_RULES} />
+            <ComplexityMeter complexity={complexity} />
+            <PolicyPreview policy={compileResult?.policy ?? null} policyHash={compileResult?.policy_hash} />
+            <RulesFiredList rules={rulesFired} />
           </div>
         </section>
 
@@ -229,8 +290,18 @@ function App() {
             </div>
           </div>
           <div className="game-stage__hint">
-            Babylon scene and hex grid will render here once the engine is wired.
+            Client-only, non-authoritative preview. Babylon scene and hex grid will render here once the engine is wired.
           </div>
+          <RunTrialButton status={trialStatus} onRun={handleRunTrial} summary={trialSummary} />
+          {simState ? (
+            <div className="trial-metadata">
+              <div>Seed: {simState.seed}</div>
+              <div>Turn: {simState.turn} / {simState.max_turns}</div>
+              <div>VP: {simState.victory_points[POC_PLAYER_ID] ?? 0}</div>
+            </div>
+          ) : (
+            <div className="trial-metadata empty">No trial run yet.</div>
+          )}
         </section>
       </main>
     </div>
