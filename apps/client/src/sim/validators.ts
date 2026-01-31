@@ -1,32 +1,18 @@
 import type { Action, GameState, ResourceStockpile } from 'shared-types'
 import { ActionType, ResourceType, UnitType } from 'shared-types'
-import type { BuildingType } from './actions'
+import { getBuildingDefinition, type BuildingType } from '../data/buildings'
+import { getUnitDefinition } from '../data/units'
 
 const getActionCost = (action: Action): ResourceStockpile => {
   switch (action.type) {
     case ActionType.Build: {
       const building = (action.payload?.building as BuildingType | undefined) ?? 'farm'
-      if (building === 'farm') {
-        return {
-          [ResourceType.Wood]: 2,
-        }
-      }
-      if (building === 'mine') {
-        return {
-          [ResourceType.Wood]: 2,
-          [ResourceType.Food]: 1,
-        }
-      }
-      return {
-        [ResourceType.Wood]: 2,
-        [ResourceType.Faith]: 1,
-      }
+      const definition = getBuildingDefinition(building)
+      return definition.cost
     }
     case ActionType.Train: {
       const unitType = (action.payload?.unitType as UnitType | undefined) ?? UnitType.Guardian
-      return unitType === UnitType.Acolyte
-        ? { [ResourceType.Faith]: 2, [ResourceType.Food]: 1 }
-        : { [ResourceType.Food]: 2, [ResourceType.Devotion]: 1 }
+      return getUnitDefinition(unitType).cost
     }
     case ActionType.Pray:
       return {}

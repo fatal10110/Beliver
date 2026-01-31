@@ -1,5 +1,6 @@
 import type { Action, DoctrinePolicy, GameState, ResourceStockpile, RuleFired } from 'shared-types'
 import { ActionType, ResourceType, UnitType } from 'shared-types'
+import { getUnitDefinition } from '../data/units'
 import { applyAction } from './actions'
 import { validateAction } from './validators'
 
@@ -158,7 +159,7 @@ export const calculateVictoryPointsBreakdown = (state: GameState): VictoryPointB
   const devotion = resources[ResourceType.Devotion] * 2
   const food = resources[ResourceType.Food]
   const wood = resources[ResourceType.Wood]
-  const units = state.units.length * 3
+  const units = state.units.reduce((sum, unit) => sum + getUnitDefinition(unit.type).vpValue, 0)
   return {
     total: faith + devotion + food + wood + units,
     faith,

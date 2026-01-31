@@ -1,7 +1,7 @@
 import type { Action, GameState, ResourceStockpile, Unit } from 'shared-types'
 import { ActionType, ResourceType, UnitType } from 'shared-types'
-
-export type BuildingType = 'farm' | 'mine' | 'shrine'
+import { getBuildingDefinition, type BuildingType } from '../data/buildings'
+import { getUnitDefinition } from '../data/units'
 
 const clamp = (value: number) => (value < 0 ? 0 : value)
 
@@ -16,14 +16,17 @@ const applyResourceDelta = (resources: ResourceStockpile, delta: ResourceStockpi
   return next
 }
 
-const createUnit = (state: GameState, unitType: UnitType, ownerId: string): Unit => ({
-  id: nextUnitId(state),
-  type: unitType,
-  owner_id: ownerId,
-  x: 10,
-  y: 10,
-  hp: 10,
-})
+const createUnit = (state: GameState, unitType: UnitType, ownerId: string): Unit => {
+  const definition = getUnitDefinition(unitType)
+  return {
+    id: nextUnitId(state),
+    type: unitType,
+    owner_id: ownerId,
+    x: 10,
+    y: 10,
+    hp: definition.baseHp,
+  }
+}
 
 export const applyAction = (state: GameState, action: Action): GameState => {
   let resources = state.resources
@@ -32,41 +35,17 @@ export const applyAction = (state: GameState, action: Action): GameState => {
   switch (action.type) {
     case ActionType.Build: {
       const building = (action.payload?.building as BuildingType | undefined) ?? 'farm'
-      if (building === 'farm') {
-        resources = applyResourceDelta(resources, {
-          [ResourceType.Wood]: -2,
-          [ResourceType.Food]: 4,
-          [ResourceType.Devotion]: 1,
-        })
-      } else if (building === 'mine') {
-        resources = applyResourceDelta(resources, {
-          [ResourceType.Wood]: 1,
-          [ResourceType.Food]: -1,
-        })
-      } else {
-        resources = applyResourceDelta(resources, {
-          [ResourceType.Faith]: 1,
-          [ResourceType.Devotion]: 2,
-          [ResourceType.Wood]: -2,
-        })
-      }
+      const definition = getBuildingDefinition(building)
+      resources = applyResourceDelta(resources, definition.cost)
+      resources = applyResourceDelta(resources, definition.yield)
       break
     }
     case ActionType.Train: {
       const unitType = (action.payload?.unitType as UnitType | undefined) ?? UnitType.Guardian
       const ownerId = action.actor_id ?? 'abrim'
       units = [...units, createUnit(state, unitType, ownerId)]
-      if (unitType === UnitType.Acolyte) {
-        resources = applyResourceDelta(resources, {
-          [ResourceType.Faith]: -2,
-          [ResourceType.Food]: -1,
-        })
-      } else {
-        resources = applyResourceDelta(resources, {
-          [ResourceType.Food]: -2,
-          [ResourceType.Devotion]: -1,
-        })
-      }
+      const definition = getUnitDefinition(unitType)
+      resources = applyResourceDelta(resources, definition.cost)
       break
     }
     case ActionType.Pray: {
