@@ -1,19 +1,19 @@
 # Production Implementation Roadmap
 
-**Architecture**: Modular Monolith (NestJS + React + Turborepo).
+**Architecture**: Hybrid services (NestJS Platform + Go Simulation + LLM Compiler) with React client in a Turborepo.
 **Goal**: Build "Sons of Abrim: The Prophet's Game".
 
 This is the master entry point for the implementation. The project is divided into 4 key categories, with detailed task lists in their respective folders.
 
-## 1. Backend (NestJS Monolith)
+## 1. Backend (Platform + Simulation)
 Located in [`production_plan/backend`](./backend)
 
-*   **Phase 1: Core Engine Skeleton** - [View Tasks](./backend/phase_1_core_engine/tasks.md)
-    *   Goal: Setup NestJS, Turborepo, and basic Game Gateways.
-*   **Phase 2: Game Logic Implementation** - [View Tasks](./backend/phase_2_game_logic/tasks.md)
-    *   Goal: Implement Hex Math, Deterministic Turn Resolution, and Resources.
+*   **Phase 1: Platform Skeleton (NestJS)** - [View Tasks](./backend/phase_1_core_engine/tasks.md)
+    *   Goal: Setup NestJS platform service, DB, and core gateways.
+*   **Phase 2: Simulation Service (Go)** - [View Tasks](./backend/phase_2_game_logic/tasks.md)
+    *   Goal: Implement deterministic hex sim, policy executor, and turn resolution.
 *   **Phase 3: Platform Services** - [View Tasks](./backend/phase_3_platform_services/tasks.md)
-    *   Goal: Auth, Matchmaking, and Shop modules.
+    *   Goal: Auth, matchmaking, policy storage, Oracle feed, and shop.
 
 ## 2. Frontend (React + Babylon.js)
 Located in [`production_plan/frontend`](./frontend)
@@ -25,13 +25,13 @@ Located in [`production_plan/frontend`](./frontend)
 *   **Phase 3: Backend Integration** - [View Tasks](./frontend/phase_3_backend_integration/tasks.md)
     *   Goal: Connect to Socket.io gateway and display Authoritative State.
 
-## 3. AI & Agents (The Oracle)
+## 3. AI & Agents (Compiler + Oracle)
 Located in [`production_plan/ai_agents`](./ai_agents)
 
 *   **Phase 1: Mock Agent** - [View Tasks](./ai_agents/phase_1_mock_agent/tasks.md)
     *   Goal: Regex-based "Mock LLM" service for free local testing.
-*   **Phase 2: Simple LLM Integration** - [View Tasks](./ai_agents/phase_2_simple_llm/tasks.md)
-    *   Goal: Connect `langchain` to OpenAI/Ollama.
+*   **Phase 2: Scripture Compiler Service** - [View Tasks](./ai_agents/phase_2_simple_llm/tasks.md)
+    *   Goal: Compile Scripture into Doctrine Policy with guardrails and budget enforcement.
 *   **Phase 3: Advanced Logic** - [View Tasks](./ai_agents/phase_3_advanced_logic/tasks.md)
     *   Goal: Faction personalities and RAG memory.
 
@@ -46,7 +46,7 @@ Located in [`production_plan/infrastructure`](./infrastructure)
 ---
 
 ## Task Progress Tracking
-- [ ] **Phase 0: Architecture Pivot** (Completed)
+- [x] **Phase 0: Architecture Pivot** (Completed)
 - [ ] **Phase 1: Foundation (Backend Phase 1 + Frontend Phase 1)**
 - [ ] **Phase 2: The Oracle (AI Phase 1)**
 - [ ] **Phase 3: Game Loop (Backend Phase 2 + Frontend Phase 2)**

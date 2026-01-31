@@ -26,7 +26,7 @@ Since the real backend might be in development, the POC will use **Mock Services
     *   `mock_api.js`: Intercepts API calls.
 *   **Policy Compiler Stub**:
     *   Local template-based compiler that turns Scripture into a JSON Doctrine Policy.
-    *   Enforces a small **Policy Complexity Budget** and validates schema.
+    *   Enforces a small **Policy Complexity Budget**, rule precedence, and validates schema.
 *   **Simulation**:
     *   Deterministic client-side turn simulation (fixed turn limit + VP tie-break).
 

@@ -7,8 +7,8 @@
     - `type Agent interface { Decide(gameState GameState) []Action }`.
 - [ ] **Integration**: Hook this into the Backend Turn Resolver.
 
-## 2. Random Bot
-- [ ] **Logic**: Create `pkg/ai/random_bot.go`.
+## 2. Seeded Random Bot
+- [ ] **Logic**: Create `pkg/ai/random_bot.go` with deterministic seeded RNG.
     - Generate list of *all* valid moves (using `ValidateAction`).
     - Pick N random actions.
 - [ ] **Use Case**: Stress testing backend validation and stability.

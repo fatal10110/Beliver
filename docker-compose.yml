@@ -21,7 +21,25 @@ services:
     volumes:
       - redis_data:/data
 
-  # Future apps/server and apps/client services will be added here or run via 'turbo dev'
+  simulation:
+    build:
+      context: ./apps/simulation
+    container_name: beliver_simulation
+    ports:
+      - "8081:8081"
+    environment:
+      SIM_PORT: 8081
+
+  compiler:
+    build:
+      context: ./apps/compiler
+    container_name: beliver_compiler
+    ports:
+      - "8082:8082"
+    environment:
+      COMPILER_PORT: 8082
+
+  # apps/server and apps/client are run via 'npm run dev'
 
 volumes:
   postgres_data:

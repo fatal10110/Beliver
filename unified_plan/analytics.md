@@ -28,9 +28,9 @@
 *   **Event Tracking**:
     *   `scripture_edit`: length, template used.
     *   `scripture_compile_request`: user, faction.
-    *   `policy_generated`: `policy_hash`, `policy_schema_version`, budget_used.
+    *   `policy_generated`: `policy_hash`, `policy_schema_version`, `compiler_model+version`, budget_used.
     *   `policy_validation_failed`: error code, rule violated.
-    *   `match_start`: policy hashes, seed, map.
+    *   `match_start`: policy hashes, `engine_version`, seed, map.
     *   `turn_end`: resources, actions taken.
     *   `match_end`: victory type, turn_count, VP breakdown.
     *   `oracle_feed_post`: policy_hash, sentiment tags.

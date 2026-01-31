@@ -23,7 +23,7 @@ A hybrid microservices architecture combining **Go** for deterministic simulatio
 *   **Endpoints**:
     *   `CompileScripture(Scripture) -> DoctrinePolicy`
 *   **Responsibilities**:
-    *   Enforce **Policy Complexity Budget**.
+    *   Enforce **Policy Complexity Budget** and rule precedence constraints.
     *   Validate against schema and banned content rules.
     *   Sanitize prompt-injection / memetic hazards.
     *   Produce `policy_hash`, `policy_schema_version`, and compiler model/version.

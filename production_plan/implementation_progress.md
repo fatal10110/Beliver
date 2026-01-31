@@ -16,21 +16,21 @@ This document tracks the high-level completion status of the project. It must be
     *   [x] **Infrastructure**: `docker-compose.yml` (Postgres/Redis) created.
     *   [x] **CI/Build**: `turbo build` verified green.
 
-## 2. Backend Implementation
+## 2. Backend Implementation (Platform + Simulation)
 *   **Status**: 🟡 **PENDING (Phase 1)**
 *   **Phases**:
-    *   [ ] **Phase 1: Core Engine Skeleton** (Gateways, DB, Auth)
-    *   [ ] **Phase 2: Game Logic** (Hex Math, Game Loop, Policy Executor)
-    *   [ ] **Phase 3: Platform Services** (Matchmaking, Shop)
+    *   [ ] **Phase 1: Platform Skeleton** (Gateways, DB, Auth)
+    *   [ ] **Phase 2: Simulation Service** (Hex Math, Game Loop, Policy Executor)
+    *   [ ] **Phase 3: Platform Services** (Matchmaking, Policy Storage, Oracle Feed)
 
 ## 3. Frontend Implementation
 *   **Status**: 🟡 **PENDING (Phase 1)**
 *   **Phases**:
     *   [ ] **Phase 1: Visual Foundation** (Toggle Layout, Babylon Setup, Hex Grid)
-    *   [ ] **Phase 2: Gameplay Interaction** (Selection, HUD, Decision Trace)
+    *   [ ] **Phase 2: Gameplay Interaction** (Playback, Inspector, Decision Trace)
     *   [ ] **Phase 3: Integration** (Socket Connection, State Sync)
 
-## 4. AI & Agents (The Oracle)
+## 4. AI & Agents (Compiler + Oracle)
 *   **Status**: ⚪ **NOT STARTED**
 *   **Phases**:
     *   [ ] **Phase 1: Mock Agent** (Regex/Stub)
@@ -43,8 +43,9 @@ This document tracks the high-level completion status of the project. It must be
 *   **2026-01-31**: Initialized Monorepo Foundation. Apps and Shared Packages are building.
 *   **2026-01-31**: Updated `concept.md` & Production Plan with Deterministic Diplomacy, Complexity Budget, and Agent Persona Review (Round 7).
 *   **2026-01-31**: Implemented Backend Database Layer (Prisma + Postgres) & Initial Persistence Service.
+*   **2026-01-31**: Aligned Production Plan to hybrid services (Platform + Simulation + Compiler) and doctrine-first loop.
+*   **2026-01-31**: Added Simulation + Compiler stubs, shared schemas, and docker-compose services for local dev.
 
 ## Technical Debt & Constraints
 *   **Prisma Generation**: Client is generated to `src/generated/client` instead of `node_modules`. This is a workaround for Monorepo/NestJS build issues. Long-term fix required.
 *   **Game State Typing**: The `Game` entity uses `Json` type. Phase 2 implementations must cast this to `IGameState` (from shared-types) at the service boundary.
-

@@ -1,0 +1,9 @@
+{
+  "name": "simulation",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "go run .",
+    "start": "go run ."
+  }
+}

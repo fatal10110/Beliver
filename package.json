@@ -5,6 +5,8 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "dev:compiler": "node ./apps/compiler/src/index.js",
+    "dev:simulation": "go run ./apps/simulation",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },

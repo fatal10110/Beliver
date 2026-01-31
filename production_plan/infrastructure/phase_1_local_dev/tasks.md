@@ -1,17 +1,20 @@
 # Infrastructure Phase 1: Local Development (Turborepo)
 
-**Goal**: Run the full stack with `docker-compose` or `pnpm dev`.
+**Goal**: Run the full stack with `docker-compose` or `npm run dev`.
 
 ## 1. Docker Development
-- [ ] **Compose File**: `docker-compose.yml` at root.
+- [x] **Compose File**: `docker-compose.yml` at root.
     - `postgres`: Port 5432.
     - `redis`: Port 6379.
+    - `compiler`: Local container (optional) for LLM compile service.
+    - `simulation`: Go sim service container.
 - [ ] **Env Vars**: `.env.docker` for containers.
 
 ## 2. Turborepo Pipelines
-- [ ] **Build**: Configure `turbo.json`:
+- [x] **Build**: Configure `turbo.json`:
     - `"build"`: Depends on `^build`.
     - `"dev"`: Runs `apps/client` (Vite) and `apps/server` (Nest Start) in parallel.
+- [x] **Dev Scripts**: Add `apps/simulation` and compiler service to `npm run dev` or separate scripts.
 - [ ] **Pruning**: Use `turbo prune --docker` for creating efficient Docker images later.
 
 ## 3. Database Management
@@ -22,4 +25,4 @@
 
 ## 4. Hot Reloading
 - [ ] **Backend**: NestJS supports HMR, ensure it works inside the monorepo.
-- [ ] **Frontend**: Vite HMR should work out of the box with `pnpm dev`.
+- [ ] **Frontend**: Vite HMR should work out of the box with `npm run dev`.

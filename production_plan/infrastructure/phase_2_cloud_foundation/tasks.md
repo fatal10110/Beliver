@@ -4,8 +4,8 @@
 
 ## 1. Architecture Design (AWS)
 - [ ] **VPC**: Setup public/private subnets.
-- [ ] **Load Balancer**: ALB handling traffic, routing `/api` to Node and WS to Go.
-- [ ] **ECS Cluster**: Fargate setup for running containers without managing EC2 instances.
+- [ ] **Load Balancer**: ALB handling traffic, routing `/api` to Platform (Node) and `/sim` to Simulation (Go).
+- [ ] **ECS Cluster**: Fargate setup for Platform, Simulation, and Compiler services.
 
 ## 2. Infrastructure as Code (IaC)
 - [ ] **Terraform/Pulumi**: Write scripts to provision:

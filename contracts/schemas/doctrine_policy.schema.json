@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DoctrinePolicy",
+  "type": "object",
+  "required": [
+    "version",
+    "weights",
+    "rules",
+    "complexity_usage",
+    "seeded_personality"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "weights": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["when", "do"],
+        "properties": {
+          "when": { "type": "object" },
+          "do": { "type": "object" },
+          "priority": { "type": "integer" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "complexity_usage": { "type": "number", "minimum": 0 },
+    "seeded_personality": { "type": "number" }
+  },
+  "additionalProperties": false
+}

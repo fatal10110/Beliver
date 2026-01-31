@@ -84,5 +84,6 @@ What determines the true successor of Abrim?
     *   **Trial (Single Player)**: Quick generic simulation for rapid iteration. Constrained by strict time/performance limits to ensure feedback loops < 5s.
     *   **Season (Multiplayer)**: Asynchronous nightly tournaments where Policies battle for global dominance.
 *   **The Meta**: The "Meta" evolves as players discover new prompt strategies. The "Social Feed" accelerates this evolution as successful Doctrines are quoted and remixed.
+*   **Platform Focus**: **Desktop First**. The UI relies on a high-fidelity Code Editor (Monaco) + 3D Canvas, optimized for mouse/keyboard usage. Mobile/Tablet viewing (Social Feed) is secondary.
 
 > **Disclaimer**: While the factions (Yahud, Kristan, Issam) mirror historical archetypes, the game is a fictionalized simulation of *belief systems*, not a critique of real-world religions. Player-authored "Scriptures" are sandboxed and moderated.
