@@ -3,30 +3,32 @@
 ## 1. Testing Phases
 
 ### Phase 1: Automated Testing (CI/CD)
-*   **Unit Tests (Go/Node)**: Verify game logic formulas (e.g., "Does damage calculation match design spec?").
-*   **Integration Tests**: Test API endpoints (Login, Matchmaking).
-*   **Sanity Checks**: Automated bot matches (AI vs AI) to check for crashes or desyncs.
+*   **Unit Tests (Go/Node)**: Verify deterministic combat math and rule evaluation.
+*   **Compiler Tests**: Schema validation, banned content filters, complexity budget enforcement.
+*   **Integration Tests**: Auth, policy compilation, match simulation endpoints.
+*   **Sanity Checks**: Automated bot matches (policy vs policy) for crashes or desyncs.
 
 ### Phase 2: Internal Playtesting (Alpha)
-*   **Focus**: Fun Factor & Core Loop.
+*   **Focus**: Fun factor, doctrine iteration speed, and clarity of feedback.
 *   **Cadence**: Weekly team playtest sessions.
-*   **Feedback**: Simple Google Form or Jira board for "Feel" issues.
+*   **Feedback**: Simple form or Jira board for "feel" issues.
 
 ### Phase 3: External Beta (Closed/Open)
-*   **Focus**: Load Testing & Edge Cases.
+*   **Focus**: Load testing, edge cases, and moderation of Oracle Feed.
 *   **Tools**:
     *   **Crash Reporting**: Sentry.
-    *   **Bug Reports**: In-game "Report Bug" button sends logs + screenshot automatically.
+    *   **Bug Reports**: In-game "Report Bug" sends logs + screenshot.
 
 ## 2. Key Test Areas
-1.  **Network Conditions**: Test on 3G/High Latency to ensure turn Sync works.
-2.  **Device Compatibility**:
-    *   Min Spec Mobile (iPhone 8 / Low-end Android).
-    *   Browser performance (Chrome/Safari/Firefox).
-3.  **Economy Validation**: Ensure no infinite money exploits.
-4.  **Save/Load Integrity**: Verify game state is never lost even if server restarts.
+1.  **Determinism**: Same `policy_hash` + `seed` must produce identical outcomes.
+2.  **Compiler Guardrails**: Injection attempts and unsafe content must be rejected or sanitized.
+3.  **Policy Budget**: Enforce complexity limits and clear error messaging.
+4.  **Network Conditions**: Test high latency for async submissions and notifications.
+5.  **Device Compatibility**: Min spec mobile and browser performance.
+6.  **Economy Validation**: Ensure no infinite resource exploits.
+7.  **Save/Load Integrity**: Match state never lost after server restart.
 
 ## 3. Cheat Prevention
 *   **Server Authority**: Never trust client inputs.
-*   **Validation**: Server checks "Is unit move distance <= max_speed?" for every move packet.
-*   **Rate Limiting**: Prevent API spam.
+*   **Validation**: Server checks all moves and policy actions.
+*   **Rate Limiting**: Prevent API spam and malicious compile loops.

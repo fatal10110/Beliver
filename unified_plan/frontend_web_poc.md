@@ -1,20 +1,19 @@
 # Frontend Web (POC)
 
 ## 1. Goal
-Evaluate the core fun factor of the game loop (Manage -> Expand -> Faith -> Conflict) without the overhead of a full engine build. Rapid iteration on mechanics.
+Validate the core prompt-engineering loop: write Scripture -> compile to Doctrine Policy -> AI acts -> deterministic outcome, with fast iteration and clear debugging.
 
 ## 2. Technology Stack
 *   **Engine**: **Babylon.js** (Recommended).
-    *   **Visual Style**: **2.5D Isometric** (using Orthographic 3D Camera).
-    *   *Why?* This achieves the crisp "Isomorphic" look the user wants while still using **3D models**, which can be reused in the final Unity production.
-    *   *Alternative*: **Phaser** (if using pre-rendered 2D sprites), but this duplicate work creates assets that can't be used in the 3D Unity version.
+    *   **Visual Style**: **2.5D Isometric** (Orthographic 3D Camera).
+    *   *Why?* Reuses 3D assets for Unity while keeping a crisp board-game look.
+    *   *Alternative*: **Phaser** (only if using pre-rendered 2D sprites).
 *   **State Management**: Zustand or Redux.
 *   **UI Overlay**: React.
 
 ## 3. Asset Sources (Free for POC)
 *   **Models**:
     *   **KayKit** (Itch.io): *Medieval Hex* and *Dungeon* packs.
-        *   *Tip*: Using these low-poly 3D models with an Orthographic camera creates a perfect "Settlers" or "Civilization 2" aesthetic.
     *   **Kenney.nl**: *Hexagon Kit*.
 *   **UI**:
     *   **Kenney.nl**: *UI Pack RPG*.
@@ -25,21 +24,27 @@ Since the real backend might be in development, the POC will use **Mock Services
 *   **Mock Data**:
     *   `mock_gamestate.json`: Fixed initial state.
     *   `mock_api.js`: Intercepts API calls.
+*   **Policy Compiler Stub**:
+    *   Local template-based compiler that turns Scripture into a JSON Doctrine Policy.
+    *   Enforces a small **Policy Complexity Budget** and validates schema.
 *   **Simulation**:
-    *   The "Game Logic" will be written in **JavaScript/TypeScript** directly in the client for this phase.
+    *   Deterministic client-side turn simulation (fixed turn limit + VP tie-break).
 
 ## 5. Scope of POC
-1.  **Lobby**: Simple name entry.
-2.  **2.5D Map View**:
-    *   **Camera**: Fixed angle (Isometric 45-degree), Orthographic projection (no perspective distortion).
+1.  **Scripture Editor**: Simple templates, linting warnings, and compile button.
+2.  **Policy Preview**: JSON view + complexity meter + "Rules Fired" list.
+3.  **2.5D Map View**:
+    *   **Camera**: Fixed angle (Isometric 45-degree), Orthographic projection.
     *   **Grid**: Hexagonal.
-3.  **Unit Control**: Raycast click on Hex -> Move Unit mesh.
-4.  **Turn End**: Advance turn.
-5.  **simple AI**: Random enemy movement.
+4.  **Agent Behavior**: AI acts from policy rules (no random AI).
+5.  **Turn End**: Advance deterministic turns to a fixed limit, resolve winner by VP.
+6.  **Oracle Feed (Optional)**: Mock inner monologue stream for spectator flavor.
 
 ## 6. Implementation Steps
 1.  **Setup**: `npm create vite@latest` (React + TS).
 2.  **Install**: `npm install @babylonjs/core`.
 3.  **Camera Setup**: Configure `ArcRotateCamera` in `ORTHOGRAPHIC_CAMERA` mode.
-4.  **Grid**: Render Hex meshes.
-5.  **Import**: Load KayKit GLTF models, scale them to fit hexes.
+4.  **Grid**: Render hex meshes.
+5.  **Compiler Stub**: Convert Scripture templates into JSON policy + complexity score.
+6.  **Deterministic Sim**: Apply policy rules to units and resources each turn.
+7.  **UI**: Policy preview + rules fired timeline + compile errors.

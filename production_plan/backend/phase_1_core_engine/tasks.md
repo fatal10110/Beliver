@@ -1,0 +1,38 @@
+# Backend Phase 1: Core Engine Skeleton (NestJS)
+
+**Goal**: Setup the Monorepo foundation and the NestJS Monolith.
+
+## 1. Monorepo Setup (Turborepo)
+- [x] **Init Project**: `npx create-turbo@latest`.
+- [x] **Workspace Config**: Define `apps/client`, `apps/server`, `packages/shared-types`.
+- [x] **Shared Types**: Create `packages/shared-types/src/index.ts`.
+    - Export `GameState`, `ActionType`, `Faction` enums.
+    - Setup `tsconfig.json` to allow imports from `apps/*`.
+
+## 2. NestJS Initialization
+- [x] **Init Server**: `nest new apps/server`.
+- [ ] **Modules**: Create feature modules:
+    - `GameModule` (Logic)
+    - `ApiModule` (HTTP Endpoints)
+    - `GatewayModule` (WebSockets)
+- [ ] **Config**: Setup `@nestjs/config` for `.env` (Postgres URL, Redis Host).
+
+## 3. Database Layer (Prisma)
+- [x] **Setup**: `npm install prisma --save-dev`.
+- [x] **Schema**: Define `schema.prisma`.
+    - `User`: id, email, passwordHash.
+    - `Game`: id, status, currentTurn, state (JSON).
+- [x] **Migration**: `npx prisma migrate dev --name init`.
+- [x] **Service**: Implement `PrismaService`.
+
+## 4. Game Gateway (Socket.io)
+- [ ] **Gateway Setup**: Create `GameGateway` with `@WebSocketGateway()`.
+- [ ] **Events**: Implement handlers:
+    - `@SubscribeMessage('join_game')`
+    - `@SubscribeMessage('submit_turn')`
+- [ ] **CORS**: Configure CORS to allow `localhost:3000` (Client).
+
+## 5. Persistence (Redis)
+- [ ] **Redis Module**: Setup connection to Redis.
+- [ ] **Session Store**: Implement `CacheService` to store active `GameState` for quick access during turns.
+- [ ] **Socket Adapter**: Configure `RedisIoAdapter` for scaling WebSocket gateways.

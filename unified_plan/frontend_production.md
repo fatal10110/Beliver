@@ -8,21 +8,26 @@
 ## 2. Architecture
 
 ### Core Systems
-*   **Game State Manager**: Deserializes JSON state from backend into GameObjects.
+*   **Game State Manager**: Deserializes authoritative state from backend into GameObjects.
 *   **Grid System**: Hex-based map rendering, pathfinding (A*), and coordinate conversion.
-*   **UI Toolkit**: Responsive UI for complex strategy menus.
+*   **Doctrine Editor**: Scripture templates, linting, compile button, and "Rules Fired" timeline.
+*   **Policy Inspector**: JSON/DSL preview, rule precedence, and complexity budget meter.
+*   **Match Playback**: Turn scrubber, VP breakdown, and result explanation.
+*   **Oracle Feed UI**: Spectator feed of AI inner monologue and sermons.
 
 ### Network Layer
-*   **API Client**: Handles HTTP REST calls to Node.js backend (Login, Lobby).
-*   **Socket Client**: WebSocket connection for real-time updates (Lobby chat, Turn ready notifications).
-*   **Resiliency**: Offline mode for planning turns (queue actions locally, sync when online).
+*   **API Client**: Handles HTTP calls for Auth, Profiles, Inventory.
+*   **Compiler Client**: Sends Scripture to Compiler Service, receives Doctrine Policy + policy hash.
+*   **Match Client**: Requests simulations, downloads replays, and fetches policy metadata.
+*   **Socket Client**: WebSocket for notifications (turn ready, season results, feed updates).
+*   **Resiliency**: Offline planning for Scripture editing and queued compile attempts.
 
 ## 3. Visual Style
-*   **Art Direction**: Stylized Low-Poly or "2.5D" Map (Civilization/Old World style) to run well on mobile.
+*   **Art Direction**: Stylized low-poly 2.5D map for mobile performance.
 *   **UI**: Diegetic elements (scrolls, wax seals) mixed with clean modern UX overlay.
 
 ## 4. Development Stages
-1.  **Vertical Slice**: 1 Faction, Basic Map, Local Hotseat Combat.
-2.  **Network Integration**: Connecting to Backend for Login/Matchmaking.
-3.  **Alpha**: Core Gameplay Loop with basic graphics.
-4.  **Beta**: Polish, VFX, Audio.
+1.  **Vertical Slice**: One faction, Scripture editor -> compile -> local deterministic sim.
+2.  **Network Integration**: Connect to compiler service + server-authoritative simulation.
+3.  **Alpha**: Full loop with Doctrine debugging and Oracle feed.
+4.  **Beta**: Polish, VFX, Audio, and performance.
