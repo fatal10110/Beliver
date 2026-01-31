@@ -1,9 +1,17 @@
 # Production Implementation Roadmap
 
 **Architecture**: Hybrid services (NestJS Platform + Go Simulation + LLM Compiler) with React client in a Turborepo.
-**Goal**: Build "Sons of Abrim: The Prophet's Game".
+2**Goal**: Build "Sons of Abrim: The Prophet's Game".
 
 This is the master entry point for the implementation. The project is divided into 4 key categories, with detailed task lists in their respective folders.
+For cross-phase goals (Web POC -> MVP -> Season -> Post-Launch), see `unified_plan/production_roadmap.md`.
+
+## Phase Alignment (How to Read This Plan)
+Each domain has its own phases below, but Phase 0 (Web POC) is a cross-domain slice that pulls from:
+- Frontend Phase 1 (Editor + debug UI + basic map)
+- Client-only sim stub (deterministic, non-authoritative)
+- Compiler stub (client-side only)
+The detailed Phase 0 execution checklist lives in `unified_plan/production_roadmap.md`.
 
 ## 1. Backend (Platform + Simulation)
 Located in [`production_plan/backend`](./backend)
@@ -46,7 +54,8 @@ Located in [`production_plan/infrastructure`](./infrastructure)
 ---
 
 ## Task Progress Tracking
-- [x] **Phase 0: Architecture Pivot** (Completed)
+- [x] **Phase 0a: Architecture Pivot** (Completed)
+- [ ] **Phase 0b: Web POC (Client-Only Slice)** (Editor + compiler stub + deterministic client sim)
 - [ ] **Phase 1: Foundation (Backend Phase 1 + Frontend Phase 1)**
 - [ ] **Phase 2: The Oracle (AI Phase 1)**
 - [ ] **Phase 3: Game Loop (Backend Phase 2 + Frontend Phase 2)**
