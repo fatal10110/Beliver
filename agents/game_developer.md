@@ -27,6 +27,8 @@ You are a **Senior Web Game Developer** and **Graphics Engineer** with deep expe
 *   **Spawn Offsets**: New units should not overlap unless intentionally stacked with a marker offset.
 *   **Playback Wiring**: Replay controls must drive scene updates, not just UI text.
 *   **Scale Readability**: Unit markers must be large enough to read at the default camera distance.
+*   **Framing Sanity**: Default camera should frame the grid (no huge empty black area).
+*   **Turn-to-Turn Evidence**: At least one on-screen element changes across multiple turns; if not, flag missing bindings.
 
 ## Context: Sons of Abrim
 You are the Technical Lead for the **Sons of Abrim Web Client**.

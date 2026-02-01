@@ -40,7 +40,7 @@ This document tracks the high-level completion status of the project. It must be
 ---
 
 ## Phase 0: Web POC Checklist (Cross-Domain)
-*   **Status**: 🟡 **IN PROGRESS**
+*   **Status**: 🟢 **COMPLETE**
 *   **Scope**: Client-only POC to validate Scripture -> Policy -> Deterministic Trial loop.
 *   **Checklist**:
     *   [x] **Shared Types & Contracts**: Doctrine policy + compile result + minimal game state types.
@@ -52,9 +52,14 @@ This document tracks the high-level completion status of the project. It must be
     *   [x] **Visual Map Preview**: Hex grid rendering + unit markers.
     *   [x] **Decorators**: Deterministic trees/rocks on forest/ridge tiles.
     *   [x] **Single-Faction Slice**: Abrim data + units/buildings + resource flow.
-    *   [ ] **POC Exit Criteria**: Compile output visible + 50-turn deterministic run + responsive layouts.
+    *   [x] **POC Exit Criteria**: Compile output visible + 50-turn deterministic run + responsive layouts.
 
 ## Recent Updates
+*   **2026-02-01**: Switched Prisma to the Postgres driver adapter and added pg typings to restore server boot.
+*   **2026-02-01**: Added Redis module, CacheService, and RedisIoAdapter for backend session persistence and WebSocket scaling.
+*   **2026-02-01**: Marked Phase 0 POC exit criteria as complete after confirming compile output, deterministic 50-turn trial, and responsive layouts.
+*   **2026-02-01**: Added headless visual review script (Playwright) for capturing POC screenshots.
+*   **2026-02-01**: Stabilized Babylon scene lifecycle to stop map blinking and boosted unit visibility under the fog overlay.
 *   **2026-01-31**: Initialized Monorepo Foundation. Apps and Shared Packages are building.
 *   **2026-01-31**: Updated `concept.md` & Production Plan with Deterministic Diplomacy, Complexity Budget, and Agent Persona Review (Round 7).
 *   **2026-01-31**: Implemented Backend Database Layer (Prisma + Postgres) & Initial Persistence Service.
@@ -80,6 +85,11 @@ This document tracks the high-level completion status of the project. It must be
 *   **2026-02-01**: Resolved client build errors by relaxing TS erasable syntax and allowing partial resource deltas.
 *   **2026-02-01**: Fixed a CSS syntax error in the GameScene legend styles.
 *   **2026-02-01**: Spread newly trained units around the spawn point so training visibly changes the map.
+*   **2026-02-01**: Added unit selection state with an inspector panel and map click selection.
+*   **2026-02-01**: Added UnitManager rendering, selected-unit path visualization, and a resource HUD bar.
+*   **2026-02-01**: Added Action Panel commands and Decision Trace Debugger UI for turn explanations.
+*   **2026-02-01**: Added fog-of-war overlay, floating text feedback, sound cues, and the Oracle feed widget.
+*   **2026-02-01**: Fixed fog-of-war canvas typing to resolve client build errors.
 
 ## Technical Debt & Constraints
 *   **Prisma Generation**: Client is generated to `src/generated/client` instead of `node_modules`. This is a workaround for Monorepo/NestJS build issues. Long-term fix required.

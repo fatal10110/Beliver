@@ -18,6 +18,8 @@ On each **code change**, **plan update**, or **new feature**, you must:
 # Required Review Steps
 1.  Gather the current diff and identify the files touched in this change set.
 2.  Run every agent in `agents/` and capture their notes as a checklist.
+2.1 If the change touches rendering/UI/simulation playback, require a visual sanity check (screenshot or explicit expected/actual) and file a note if missing.
+2.2 If available, run `npm run visual:check` to capture headless screenshots for the review record.
 3.  Fix every note in code or update the relevant plan document to record the decision.
 4.  Re-run all agents until there are no remaining notes.
 5.  Summarize the resolved notes in the final response.

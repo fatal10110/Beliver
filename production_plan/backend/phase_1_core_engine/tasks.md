@@ -33,9 +33,9 @@
 - [x] **CORS**: Configure CORS to allow `localhost:3000` (Client).
 
 ## 5. Persistence (Redis)
-- [ ] **Redis Module**: Setup connection to Redis.
-- [ ] **Session Store**: Implement `CacheService` to store active `GameState` for quick access during turns.
-- [ ] **Socket Adapter**: Configure `RedisIoAdapter` for scaling WebSocket gateways.
+- [x] **Redis Module**: Setup connection to Redis.
+- [x] **Session Store**: Implement `CacheService` to store active `GameState` for quick access during turns.
+- [x] **Socket Adapter**: Configure `RedisIoAdapter` for scaling WebSocket gateways.
 
 ## 6. Simulation Service Scaffold (Go)
 - [x] **Init Service**: Create `apps/simulation` (Go module) with a basic HTTP server.

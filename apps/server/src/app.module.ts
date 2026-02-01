@@ -7,6 +7,7 @@ import { ApiModule } from './api/api.module';
 import { GameModule } from './game/game.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { PrismaModule } from './prisma/prisma.module';
       envFilePath: ['.env', '.env.local'],
     }),
     PrismaModule,
+    RedisModule,
     GameModule,
     ApiModule,
     GatewayModule,

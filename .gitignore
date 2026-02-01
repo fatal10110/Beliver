@@ -63,3 +63,4 @@ apps/simulation/simulation_external
 tmp/
 temp/
 .agent/
+artifacts/

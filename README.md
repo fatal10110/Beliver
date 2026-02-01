@@ -36,6 +36,13 @@ If you hit the macOS LC_UUID dyld error, run once in your shell:
 export GOFLAGS="-ldflags=-linkmode=external"
 ```
 
+## Visual review (headless)
+```bash
+npx playwright install chromium
+npm run dev -- --filter=client
+npm run visual:check -- --url=http://localhost:5173
+```
+
 ## Notes
 - The client currently aliases `shared-types` to source for Vite/TS dev.
 - The simulation service is a scaffold; match execution is not implemented yet.

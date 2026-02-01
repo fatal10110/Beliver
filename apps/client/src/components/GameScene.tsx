@@ -1,21 +1,22 @@
 import { useEffect, useMemo, useRef } from 'react'
-import type { AbstractMesh } from '@babylonjs/core'
+import type { LinesMesh, Mesh } from '@babylonjs/core'
 import {
   ArcRotateCamera,
   Camera,
   Color3,
   Color4,
+  DynamicTexture,
   Engine,
   HemisphericLight,
   Matrix,
   MeshBuilder,
+  PointerEventTypes,
   Quaternion,
   Scene,
   StandardMaterial,
   Vector3,
 } from '@babylonjs/core'
 import type { Unit } from 'shared-types'
-import { UnitType } from 'shared-types'
 import '@babylonjs/loaders'
 import {
   axialToWorld,
@@ -25,18 +26,13 @@ import {
   type HexTile,
   type TerrainType,
 } from '../systems/HexGrid'
+import { UnitManager } from '../systems/UnitManager'
 
 const TERRAIN_COLORS: Record<TerrainType, string> = {
   plains: '#b9a984',
   forest: '#5a7a58',
   ridge: '#8a7f72',
   oasis: '#4a8a88',
-}
-
-const UNIT_COLORS: Record<UnitType, string> = {
-  [UnitType.Acolyte]: '#e1c17b',
-  [UnitType.Guardian]: '#d0854c',
-  [UnitType.Ranger]: '#6f8f7d',
 }
 
 type DecorationKind = 'tree' | 'rock'
@@ -56,6 +52,9 @@ type GameSceneProps = {
   seed?: number
   units?: Unit[]
   highlightUnits?: string[]
+  selectedUnitId?: string | null
+  onSelectUnit?: (unitId: string | null) => void
+  selectedPath?: Array<{ x: number; y: number }>
 }
 
 const createSeededRng = (seedValue: number) => {
@@ -112,14 +111,25 @@ const GameScene = ({
   seed = 7123,
   units = [],
   highlightUnits = [],
+  selectedUnitId = null,
+  onSelectUnit,
+  selectedPath = [],
 }: GameSceneProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const sceneRef = useRef<Scene | null>(null)
-  const unitMeshesRef = useRef<Map<string, AbstractMesh>>(new Map())
+  const unitManagerRef = useRef<UnitManager | null>(null)
+  const pathLineRef = useRef<LinesMesh | null>(null)
+  const fogMeshRef = useRef<Mesh | null>(null)
+  const fogTextureRef = useRef<DynamicTexture | null>(null)
+  const onSelectUnitRef = useRef<GameSceneProps['onSelectUnit']>(onSelectUnit)
   const tiles = useMemo(() => buildHexGrid(columns, rows, size, seed), [columns, rows, size, seed])
   const decorations = useMemo(() => buildDecorations(tiles, seed, size), [tiles, seed, size])
   const bounds = useMemo(() => getGridBounds(tiles, size), [tiles, size])
   const offset = useMemo(() => getGridOffset(bounds), [bounds])
+
+  useEffect(() => {
+    onSelectUnitRef.current = onSelectUnit
+  }, [onSelectUnit])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -279,6 +289,44 @@ const GameScene = ({
       base.thinInstanceRefreshBoundingInfo(true)
     })
 
+    const fogTextureSize = 512
+    const fogTexture = new DynamicTexture('fog-texture', fogTextureSize, scene, false)
+    fogTexture.hasAlpha = true
+    const fogMaterial = new StandardMaterial('fog-material', scene)
+    fogMaterial.diffuseTexture = fogTexture
+    fogMaterial.opacityTexture = fogTexture
+    fogMaterial.disableLighting = true
+    fogMaterial.backFaceCulling = false
+    fogMaterial.alpha = 1
+
+    const fogPadding = size * 6
+    const fogMesh = MeshBuilder.CreateGround(
+      'fog-plane',
+      { width: bounds.width + fogPadding, height: bounds.height + fogPadding },
+      scene,
+    )
+    fogMesh.position.y = 0.62
+    fogMesh.material = fogMaterial
+    fogMesh.isPickable = false
+    fogMesh.renderingGroupId = 2
+    fogMeshRef.current = fogMesh
+    fogTextureRef.current = fogTexture
+
+    unitManagerRef.current = new UnitManager(scene)
+
+    const pickObserver = scene.onPointerObservable.add((pointerInfo) => {
+      if (pointerInfo.type !== PointerEventTypes.POINTERPICK) {
+        return
+      }
+      const handler = onSelectUnitRef.current
+      if (!handler) {
+        return
+      }
+      const picked = pointerInfo.pickInfo?.pickedMesh
+      const unitId = (picked?.metadata as { unitId?: string } | undefined)?.unitId
+      handler(unitId ?? null)
+    })
+
     engine.runRenderLoop(() => {
       scene.render()
     })
@@ -291,8 +339,20 @@ const GameScene = ({
 
     return () => {
       window.removeEventListener('resize', onResize)
-      unitMeshesRef.current.forEach((mesh) => mesh.dispose())
-      unitMeshesRef.current.clear()
+      if (pickObserver) {
+        scene.onPointerObservable.remove(pickObserver)
+      }
+      unitManagerRef.current?.dispose()
+      unitManagerRef.current = null
+      if (pathLineRef.current) {
+        pathLineRef.current.dispose()
+        pathLineRef.current = null
+      }
+      if (fogMeshRef.current) {
+        fogMeshRef.current.dispose()
+        fogMeshRef.current = null
+      }
+      fogTextureRef.current = null
       scene.dispose()
       engine.dispose()
       sceneRef.current = null
@@ -303,37 +363,78 @@ const GameScene = ({
     const scene = sceneRef.current
     if (!scene) return
 
-    const existing = unitMeshesRef.current
     const highlightSet = new Set(highlightUnits)
-    const nextIds = new Set(units.map((unit) => unit.id))
-
-    existing.forEach((mesh, id) => {
-      if (!nextIds.has(id)) {
-        mesh.dispose()
-        existing.delete(id)
-      }
+    unitManagerRef.current?.sync(units, {
+      offset,
+      size,
+      highlightSet,
+      selectedUnitId,
     })
+  }, [units, size, offset, highlightUnits, selectedUnitId])
 
+  useEffect(() => {
+    const fogTexture = fogTextureRef.current
+    if (!fogTexture) return
+
+    const context = fogTexture.getContext() as CanvasRenderingContext2D
+    const textureSize = fogTexture.getSize().width
+    context.clearRect(0, 0, textureSize, textureSize)
+    context.fillStyle = 'rgba(12, 12, 12, 0.6)'
+    context.fillRect(0, 0, textureSize, textureSize)
+
+    const worldMinX = bounds.minX + offset.x
+    const worldMaxX = bounds.maxX + offset.x
+    const worldMinZ = bounds.minZ + offset.z
+    const worldMaxZ = bounds.maxZ + offset.z
+    const worldWidth = worldMaxX - worldMinX || 1
+    const worldHeight = worldMaxZ - worldMinZ || 1
+    const radiusWorld = size * 2.2
+    const radiusPx = (radiusWorld / worldWidth) * textureSize
+
+    context.globalCompositeOperation = 'destination-out'
+    context.fillStyle = 'rgba(0, 0, 0, 1)'
     units.forEach((unit) => {
       const { x, z } = axialToWorld(unit.x, unit.y, size)
-      let marker = existing.get(unit.id)
-      if (!marker) {
-        marker = MeshBuilder.CreateSphere(`unit-${unit.id}`, { diameter: size * 0.65 }, scene)
-        const material = new StandardMaterial(`mat-${unit.id}`, scene)
-        material.diffuseColor = Color3.FromHexString(UNIT_COLORS[unit.type])
-        material.specularColor = new Color3(0.2, 0.2, 0.2)
-        marker.material = material
-        existing.set(unit.id, marker)
-      }
-      const material = marker.material as StandardMaterial
-      const baseColor = Color3.FromHexString(UNIT_COLORS[unit.type])
-      const isHighlighted = highlightSet.has(unit.id)
-      material.diffuseColor = baseColor
-      material.emissiveColor = isHighlighted ? baseColor.scale(0.35) : Color3.Black()
-      marker.scaling = isHighlighted ? new Vector3(1.35, 1.35, 1.35) : new Vector3(1, 1, 1)
-      marker.position = new Vector3(x + offset.x, 0.45, z + offset.z)
+      const worldX = x + offset.x
+      const worldZ = z + offset.z
+      const u = (worldX - worldMinX) / worldWidth
+      const v = (worldZ - worldMinZ) / worldHeight
+      const px = u * textureSize
+      const py = (1 - v) * textureSize
+      context.beginPath()
+      context.arc(px, py, radiusPx, 0, Math.PI * 2)
+      context.fill()
     })
-  }, [units, size, offset, highlightUnits])
+    context.globalCompositeOperation = 'source-over'
+    fogTexture.update()
+  }, [units, size, offset, bounds])
+
+  useEffect(() => {
+    const scene = sceneRef.current
+    if (!scene) return
+
+    if (!selectedPath || selectedPath.length < 2) {
+      if (pathLineRef.current) {
+        pathLineRef.current.dispose()
+        pathLineRef.current = null
+      }
+      return
+    }
+
+    const points = selectedPath.map((point, index) => {
+      const { x, z } = axialToWorld(point.x, point.y, size)
+      return new Vector3(x + offset.x, 0.6 + index * 0.02, z + offset.z)
+    })
+
+    if (pathLineRef.current) {
+      MeshBuilder.CreateLines('unit-path', { points, instance: pathLineRef.current })
+    } else {
+      const lines = MeshBuilder.CreateLines('unit-path', { points }, scene)
+      lines.color = new Color3(0.94, 0.74, 0.4)
+      lines.alpha = 0.85
+      pathLineRef.current = lines
+    }
+  }, [selectedPath, size, offset])
 
   return (
     <div className="game-scene">
