@@ -30,5 +30,6 @@
 
 ## 4. Asset Pipeline
 - [ ] **Import**: Add KayKit assets to `apps/client/public/assets`.
-- [ ] **GLTF Loader**: Use `@babylonjs/loaders`.
-- [ ] **Decorators**: Randomly place Trees/Rocks on "Forest" or "Mountain" tiles.
+- [x] **GLTF Loader**: Use `@babylonjs/loaders`.
+- [x] **Decorators**: Randomly place Trees/Rocks on "Forest" or "Mountain" tiles.
+    - **Note**: Using primitive placeholders until KayKit assets are added.

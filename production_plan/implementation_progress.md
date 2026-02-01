@@ -1,6 +1,6 @@
 # Implementation Progress
 
-**Last Updated**: 2026-01-31
+**Last Updated**: 2026-02-01
 **Overall Status**: 🏗️ **Phase 1: Foundation (In Progress)**
 
 This document tracks the high-level completion status of the project. It must be updated whenever a significant implementation step is completed.
@@ -39,6 +39,21 @@ This document tracks the high-level completion status of the project. It must be
 
 ---
 
+## Phase 0: Web POC Checklist (Cross-Domain)
+*   **Status**: 🟡 **IN PROGRESS**
+*   **Scope**: Client-only POC to validate Scripture -> Policy -> Deterministic Trial loop.
+*   **Checklist**:
+    *   [x] **Shared Types & Contracts**: Doctrine policy + compile result + minimal game state types.
+    *   [x] **Doctrine Editor UI**: Templates, lint/compile controls, and status feedback.
+    *   [x] **Policy Debugging UI**: Complexity meter, policy preview, rules fired list.
+    *   [x] **Compiler Stub**: Deterministic stub output with policy hash + complexity budget.
+    *   [x] **Client Simulation Stub**: Deterministic 50-turn loop with VP tie-break.
+    *   [x] **Trial Controls**: Run trial button + feedback + run summary.
+    *   [x] **Visual Map Preview**: Hex grid rendering + unit markers.
+    *   [x] **Decorators**: Deterministic trees/rocks on forest/ridge tiles.
+    *   [x] **Single-Faction Slice**: Abrim data + units/buildings + resource flow.
+    *   [ ] **POC Exit Criteria**: Compile output visible + 50-turn deterministic run + responsive layouts.
+
 ## Recent Updates
 *   **2026-01-31**: Initialized Monorepo Foundation. Apps and Shared Packages are building.
 *   **2026-01-31**: Updated `concept.md` & Production Plan with Deterministic Diplomacy, Complexity Budget, and Agent Persona Review (Round 7).
@@ -53,6 +68,18 @@ This document tracks the high-level completion status of the project. It must be
 *   **2026-01-31**: Added Babylon-based GameScene with orthographic camera and thin-instanced hex grid, plus Phase 1 visual foundation checklist updates.
 *   **2026-01-31**: Added game-engine scaffold entrypoint and forced external linking for simulation dev to avoid macOS LC_UUID errors.
 *   **2026-01-31**: Removed invalid `@babylonjs/react` dependency and aligned Phase 1 dependency list to installed packages.
+*   **2026-02-01**: Added deterministic terrain decorators and GLTF loader wiring for the Phase 1 asset pipeline.
+*   **2026-02-01**: Added Phase 0 Web POC checklist to clarify cross-domain plan progress.
+*   **2026-02-01**: Created core NestJS feature modules and global config setup for Phase 1 backend.
+*   **2026-02-01**: Implemented GameGateway with join/submit handlers and socket.io CORS configuration.
+*   **2026-02-01**: Switched Prisma client generation to CJS outputs and copied generated runtime assets into server builds.
+*   **2026-02-01**: Adjusted server TypeScript config to remove incompatible package-exports resolution flag for Nest builds.
+*   **2026-02-01**: Added turn playback controls and wired simulation timeline into the Babylon scene.
+*   **2026-02-01**: Made Move actions update unit positions for visible per-turn playback changes.
+*   **2026-02-01**: Added per-turn action readout and movement highlight pulses in the map preview.
+*   **2026-02-01**: Resolved client build errors by relaxing TS erasable syntax and allowing partial resource deltas.
+*   **2026-02-01**: Fixed a CSS syntax error in the GameScene legend styles.
+*   **2026-02-01**: Spread newly trained units around the spawn point so training visibly changes the map.
 
 ## Technical Debt & Constraints
 *   **Prisma Generation**: Client is generated to `src/generated/client` instead of `node_modules`. This is a workaround for Monorepo/NestJS build issues. Long-term fix required.

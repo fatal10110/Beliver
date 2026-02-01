@@ -15,6 +15,13 @@ On each **code change**, **plan update**, or **new feature**, you must:
     -   **NO** feedback can be ignored or "left for later" without a tracked task.
 4.  **Feedback Loop**: Continue the review cycle until **ALL** agents approve and **ALL** notes are resolved.
 
+# Required Review Steps
+1.  Gather the current diff and identify the files touched in this change set.
+2.  Run every agent in `agents/` and capture their notes as a checklist.
+3.  Fix every note in code or update the relevant plan document to record the decision.
+4.  Re-run all agents until there are no remaining notes.
+5.  Summarize the resolved notes in the final response.
+
 # Rule: Update Implementation Progress
 
 **Goal**: Ensure `production_plan/implementation_progress.md` remains the Source of Truth for the project's state.

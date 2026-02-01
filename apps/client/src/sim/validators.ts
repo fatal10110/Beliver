@@ -3,7 +3,7 @@ import { ActionType, ResourceType, UnitType } from 'shared-types'
 import { getBuildingDefinition, type BuildingType } from '../data/buildings'
 import { getUnitDefinition } from '../data/units'
 
-const getActionCost = (action: Action): ResourceStockpile => {
+const getActionCost = (action: Action): Partial<ResourceStockpile> => {
   switch (action.type) {
     case ActionType.Build: {
       const building = (action.payload?.building as BuildingType | undefined) ?? 'farm'
@@ -29,6 +29,9 @@ const getActionCost = (action: Action): ResourceStockpile => {
 export const validateAction = (state: GameState, action: Action): boolean => {
   const cost = getActionCost(action)
   return Object.entries(cost).every(([key, value]) => {
+    if (typeof value !== 'number') {
+      return true
+    }
     const typedKey = key as ResourceType
     return (state.resources[typedKey] ?? 0) >= value
   })

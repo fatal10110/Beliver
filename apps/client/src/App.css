@@ -475,10 +475,60 @@
 .game-scene__legend span:nth-child(4)::before {
   background: #4a8a88;
 }
-}
 
 .game-stage__hint {
   font-size: 0.85rem;
+  color: var(--color-ink-muted);
+}
+
+.playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-line);
+  background: rgba(247, 241, 230, 0.7);
+}
+
+.playback-button {
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  padding: 6px 12px;
+  background: #f3e8d4;
+  color: var(--color-ink);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.playback-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.playback-controls input[type='range'] {
+  flex: 1;
+}
+
+.playback-readout {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-muted);
+  min-width: 110px;
+  text-align: right;
+}
+
+.playback-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 10px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--color-ink-muted);
 }
 

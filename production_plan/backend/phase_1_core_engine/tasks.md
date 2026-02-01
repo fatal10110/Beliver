@@ -11,11 +11,11 @@
 
 ## 2. NestJS Initialization (Platform Service)
 - [x] **Init Server**: `nest new apps/server`.
-- [ ] **Modules**: Create feature modules:
+- [x] **Modules**: Create feature modules:
     - `GameModule` (Logic)
     - `ApiModule` (HTTP Endpoints)
     - `GatewayModule` (WebSockets)
-- [ ] **Config**: Setup `@nestjs/config` for `.env` (Postgres URL, Redis Host).
+- [x] **Config**: Setup `@nestjs/config` for `.env` (Postgres URL, Redis Host).
 
 ## 3. Database Layer (Prisma)
 - [x] **Setup**: `npm install prisma --save-dev`.
@@ -26,11 +26,11 @@
 - [x] **Service**: Implement `PrismaService`.
 
 ## 4. Game Gateway (Socket.io)
-- [ ] **Gateway Setup**: Create `GameGateway` with `@WebSocketGateway()`.
-- [ ] **Events**: Implement handlers:
+- [x] **Gateway Setup**: Create `GameGateway` with `@WebSocketGateway()`.
+- [x] **Events**: Implement handlers:
     - `@SubscribeMessage('join_game')`
     - `@SubscribeMessage('submit_turn')`
-- [ ] **CORS**: Configure CORS to allow `localhost:3000` (Client).
+- [x] **CORS**: Configure CORS to allow `localhost:3000` (Client).
 
 ## 5. Persistence (Redis)
 - [ ] **Redis Module**: Setup connection to Redis.

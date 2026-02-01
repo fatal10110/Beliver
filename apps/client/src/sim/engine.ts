@@ -25,6 +25,7 @@ export type SimulationResult = {
   actions: Action[]
   rulesFired: RuleFired[]
   turnLog: TurnLogEntry[]
+  turnStates: GameState[]
 }
 
 type SimulationConfig = {
@@ -170,8 +171,6 @@ export const calculateVictoryPointsBreakdown = (state: GameState): VictoryPointB
   }
 }
 
-const calculateVictoryPoints = (state: GameState) => calculateVictoryPointsBreakdown(state).total
-
 const cloneState = (state: GameState): GameState => ({
   ...state,
   resources: { ...state.resources },
@@ -186,6 +185,7 @@ export const runSimulation = ({ initialState, policy, playerId, turnLimit }: Sim
   const rulesFired: RuleFired[] = []
   const actions: Action[] = []
   const turnLog: TurnLogEntry[] = []
+  const turnStates: GameState[] = [cloneState(current)]
 
   for (let turn = current.turn + 1; turn <= limit; turn += 1) {
     const { actionName, rule } = evaluatePolicy(current, policy, rng)
@@ -221,8 +221,9 @@ export const runSimulation = ({ initialState, policy, playerId, turnLimit }: Sim
       resources: { ...next.resources },
       victoryPoints,
     })
+    turnStates.push(cloneState(next))
     current = next
   }
 
-  return { finalState: current, actions, rulesFired, turnLog }
+  return { finalState: current, actions, rulesFired, turnLog, turnStates }
 }

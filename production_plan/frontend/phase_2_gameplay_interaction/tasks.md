@@ -12,7 +12,7 @@
 
 ## 2. Inspection & Playback
 - [ ] **Path Visualization**: When unit selected, show last-path / intended path from policy decision.
-- [ ] **Playback Controls**: Play, pause, and scrub turns for deterministic replays.
+- [x] **Playback Controls**: Play, pause, and scrub turns for deterministic replays.
 - [ ] **Inspector Panel**: Show unit stats + last action + rule that fired.
 
 ## 3. HUD Implementation (React)

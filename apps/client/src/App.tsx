@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { CompileResult, PolicyComplexity } from 'shared-types'
-import { ResourceType } from 'shared-types'
+import type { Action, CompileResult, GameState, PolicyComplexity } from 'shared-types'
+import { ActionType, ResourceType } from 'shared-types'
 import ComplexityMeter from './components/ComplexityMeter'
 import DoctrineEditor, { type DoctrineTemplate, type EditorStatus } from './components/DoctrineEditor'
 import GameScene from './components/GameScene'
@@ -56,14 +56,37 @@ const FALLBACK_COMPLEXITY: PolicyComplexity = {
 const formatResources = (resources: Record<ResourceType, number>) =>
   `Faith ${resources[ResourceType.Faith]} | Food ${resources[ResourceType.Food]} | Wood ${resources[ResourceType.Wood]} | Devotion ${resources[ResourceType.Devotion]}`
 
+const formatAction = (action?: Action) => {
+  if (!action) return 'None'
+  switch (action.type) {
+    case ActionType.Build:
+      return `Build ${(action.payload?.building as string | undefined) ?? 'structure'}`
+    case ActionType.Train:
+      return `Train ${(action.payload?.unitType as string | undefined) ?? 'unit'}`
+    case ActionType.Move:
+      return 'Move'
+    case ActionType.Pray:
+      return 'Pray'
+    case ActionType.Harvest:
+      return 'Harvest'
+    case ActionType.Wait:
+    default:
+      return 'Wait'
+  }
+}
+
 function App() {
   const [layout, setLayout] = useState<LayoutMode>('split')
   const [activeTemplateId, setActiveTemplateId] = useState(TEMPLATES[0].id)
   const [status, setStatus] = useState<StatusConfig>(DEFAULT_STATUS)
   const [trialStatus, setTrialStatus] = useState<TrialStatus>('idle')
   const [trialSummary, setTrialSummary] = useState<string>()
+  const [playbackTimeline, setPlaybackTimeline] = useState<GameState[] | null>(null)
+  const [playbackIndex, setPlaybackIndex] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
   const timeoutRef = useRef<number | null>(null)
   const runTimeoutRef = useRef<number | null>(null)
+  const playbackTimerRef = useRef<number | null>(null)
 
   const {
     doctrineText,
@@ -94,8 +117,40 @@ function App() {
         window.clearTimeout(runTimeoutRef.current)
         runTimeoutRef.current = null
       }
+      if (playbackTimerRef.current) {
+        window.clearInterval(playbackTimerRef.current)
+        playbackTimerRef.current = null
+      }
     }
   }, [])
+
+  useEffect(() => {
+    if (!isPlaying || !playbackTimeline || playbackTimeline.length === 0) {
+      if (playbackTimerRef.current) {
+        window.clearInterval(playbackTimerRef.current)
+        playbackTimerRef.current = null
+      }
+      return
+    }
+
+    playbackTimerRef.current = window.setInterval(() => {
+      setPlaybackIndex((prev) => {
+        if (!playbackTimeline) return prev
+        if (prev >= playbackTimeline.length - 1) {
+          setIsPlaying(false)
+          return prev
+        }
+        return prev + 1
+      })
+    }, 350)
+
+    return () => {
+      if (playbackTimerRef.current) {
+        window.clearInterval(playbackTimerRef.current)
+        playbackTimerRef.current = null
+      }
+    }
+  }, [isPlaying, playbackTimeline])
 
   const queueStatus = (nextStatus: StatusConfig, settleStatus?: StatusConfig) => {
     if (timeoutRef.current) {
@@ -213,6 +268,13 @@ function App() {
       window.clearTimeout(runTimeoutRef.current)
       runTimeoutRef.current = null
     }
+    if (playbackTimerRef.current) {
+      window.clearInterval(playbackTimerRef.current)
+      playbackTimerRef.current = null
+    }
+    setIsPlaying(false)
+    setPlaybackTimeline(null)
+    setPlaybackIndex(0)
 
     const result = resolveCompileResult()
     if (!result || result.errors?.length) {
@@ -235,6 +297,9 @@ function App() {
       setRulesFired(simulation.rulesFired)
       setTurnLog(simulation.turnLog)
       setTrialStatus('complete')
+      setPlaybackTimeline(simulation.turnStates)
+      setPlaybackIndex(0)
+      setIsPlaying(true)
 
       const vp = simulation.finalState.victory_points[POC_PLAYER_ID] ?? 0
       const resourceSummary = formatResources(simulation.finalState.resources)
@@ -245,8 +310,40 @@ function App() {
 
   const complexity = compileResult?.complexity ?? FALLBACK_COMPLEXITY
   const fallbackState = useMemo(() => createSingleFactionState(DEFAULT_POC_SEED), [])
-  const sceneUnits = simState?.units ?? fallbackState.units
-  const sceneSeed = simState?.seed ?? DEFAULT_POC_SEED
+  const displayState =
+    playbackTimeline && playbackTimeline.length > 0
+      ? playbackTimeline[Math.min(playbackIndex, playbackTimeline.length - 1)]
+      : simState
+  const sceneUnits = displayState?.units ?? fallbackState.units
+  const sceneSeed = displayState?.seed ?? DEFAULT_POC_SEED
+  const playbackMaxTurn =
+    playbackTimeline && playbackTimeline.length > 0
+      ? playbackTimeline[playbackTimeline.length - 1]?.turn ?? 0
+      : simState?.turn ?? 0
+  const playbackTurn = playbackTimeline ? displayState?.turn ?? 0 : simState?.turn ?? 0
+  const playbackReady = (playbackTimeline?.length ?? 0) > 0
+  const playbackEntry = playbackTurn > 0 ? turnLog[playbackTurn - 1] : undefined
+  const playbackRule = playbackTurn > 0 ? rulesFired.find((rule) => rule.turn === playbackTurn) : undefined
+  const highlightUnits = useMemo(() => {
+    if (!playbackTimeline || playbackTurn === 0 || !displayState) return []
+    const previous = playbackTimeline[Math.max(playbackTurn - 1, 0)]
+    const prevMap = new Map(previous.units.map((unit) => [unit.id, unit]))
+    return displayState.units
+      .filter((unit) => {
+        const prev = prevMap.get(unit.id)
+        return prev ? prev.x !== unit.x || prev.y !== unit.y : false
+      })
+      .map((unit) => unit.id)
+  }, [displayState, playbackTimeline, playbackTurn])
+  const handleTogglePlayback = () => {
+    if (!playbackReady) return
+    if (isPlaying) {
+      setIsPlaying(false)
+      return
+    }
+    setPlaybackIndex((prev) => (prev >= playbackMaxTurn ? 0 : prev))
+    setIsPlaying(true)
+  }
 
   return (
     <div className={`app layout-${layout}`}>
@@ -298,18 +395,48 @@ function App() {
           <div className="game-stage">
           <div className="game-stage__label">Game View</div>
           <div className="game-stage__canvas">
-              <GameScene seed={sceneSeed} units={sceneUnits} />
+              <GameScene seed={sceneSeed} units={sceneUnits} highlightUnits={highlightUnits} />
           </div>
         </div>
         <div className="game-stage__hint">
           Client-only, non-authoritative preview. Babylon scene and hex grid will render here once the engine is wired.
         </div>
+        <div className="playback-controls">
+          <button
+            type="button"
+            className="playback-button"
+            onClick={handleTogglePlayback}
+            disabled={!playbackReady}
+          >
+            {isPlaying ? 'Pause' : 'Play'}
+          </button>
+          <input
+            type="range"
+            min={0}
+            max={playbackMaxTurn}
+            value={playbackTurn}
+            onChange={(event) => {
+              const next = Number(event.target.value)
+              setPlaybackIndex(next)
+              setIsPlaying(false)
+            }}
+            disabled={!playbackReady}
+          />
+          <div className="playback-readout">
+            Turn {playbackTurn} / {playbackMaxTurn}
+          </div>
+        </div>
+        <div className="playback-meta">
+          <div>Action: {formatAction(playbackEntry?.action)}</div>
+          <div>Rule: {playbackRule?.rule_name ?? '—'}</div>
+          <div>Units: {displayState?.units.length ?? 0}</div>
+        </div>
         <RunTrialButton status={trialStatus} onRun={handleRunTrial} summary={trialSummary} />
-        {simState ? (
+        {displayState ? (
           <div className="trial-metadata">
-            <div>Seed: {simState.seed}</div>
-            <div>Turn: {simState.turn} / {simState.max_turns}</div>
-            <div>VP: {simState.victory_points[POC_PLAYER_ID] ?? 0}</div>
+            <div>Seed: {displayState.seed}</div>
+            <div>Turn: {displayState.turn} / {displayState.max_turns}</div>
+            <div>VP: {displayState.victory_points[POC_PLAYER_ID] ?? 0}</div>
           </div>
         ) : (
           <div className="trial-metadata empty">No trial run yet.</div>
