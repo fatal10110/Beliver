@@ -5,37 +5,28 @@ export type HexTile = {
   q: number
   r: number
   x: number
-  y: number
-  points: string
+  z: number
   terrain: TerrainType
+}
+
+export type GridBounds = {
+  minX: number
+  maxX: number
+  minZ: number
+  maxZ: number
+  width: number
+  height: number
 }
 
 const SQRT3 = Math.sqrt(3)
 
 const normalizeSeed = (value: number) => (value >>> 0) / 0xffffffff
 
-export const axialToPixel = (q: number, r: number, size: number) => {
+export const axialToWorld = (q: number, r: number, size: number) => {
   return {
     x: size * SQRT3 * (q + r / 2),
-    y: size * 1.5 * r,
+    z: size * 1.5 * r,
   }
-}
-
-const hexCorner = (centerX: number, centerY: number, size: number, index: number) => {
-  const angle = (Math.PI / 180) * (60 * index - 30)
-  return {
-    x: centerX + size * Math.cos(angle),
-    y: centerY + size * Math.sin(angle),
-  }
-}
-
-const hexPoints = (centerX: number, centerY: number, size: number) => {
-  const points = []
-  for (let i = 0; i < 6; i += 1) {
-    const corner = hexCorner(centerX, centerY, size, i)
-    points.push(`${corner.x.toFixed(2)},${corner.y.toFixed(2)}`)
-  }
-  return points.join(' ')
 }
 
 const pickTerrain = (q: number, r: number, seed: number): TerrainType => {
@@ -52,15 +43,14 @@ export const buildHexGrid = (columns: number, rows: number, size: number, seed: 
 
   for (let r = 0; r < rows; r += 1) {
     for (let q = 0; q < columns; q += 1) {
-      const { x, y } = axialToPixel(q, r, size)
+      const { x, z } = axialToWorld(q, r, size)
       const id = `hex-${q}-${r}`
       tiles.push({
         id,
         q,
         r,
         x,
-        y,
-        points: hexPoints(x, y, size),
+        z,
         terrain: pickTerrain(q, r, seed),
       })
     }
@@ -69,12 +59,17 @@ export const buildHexGrid = (columns: number, rows: number, size: number, seed: 
   return tiles
 }
 
-export const getGridBounds = (tiles: HexTile[], size: number) => {
+export const getGridBounds = (tiles: HexTile[], size: number): GridBounds => {
   const xs = tiles.map((tile) => tile.x)
-  const ys = tiles.map((tile) => tile.y)
+  const zs = tiles.map((tile) => tile.z)
   const minX = Math.min(...xs) - size * 1.2
   const maxX = Math.max(...xs) + size * 1.2
-  const minY = Math.min(...ys) - size * 1.2
-  const maxY = Math.max(...ys) + size * 1.2
-  return { minX, minY, width: maxX - minX, height: maxY - minY }
+  const minZ = Math.min(...zs) - size * 1.2
+  const maxZ = Math.max(...zs) + size * 1.2
+  return { minX, maxX, minZ, maxZ, width: maxX - minX, height: maxZ - minZ }
 }
+
+export const getGridOffset = (bounds: GridBounds) => ({
+  x: -((bounds.minX + bounds.maxX) / 2),
+  z: -((bounds.minZ + bounds.maxZ) / 2),
+})

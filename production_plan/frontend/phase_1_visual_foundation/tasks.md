@@ -3,10 +3,10 @@
 **Goal**: Setup `apps/client` with the Doctrine Editor + basic Babylon.js rendering.
 
 ## 1. Client App Setup
-- [ ] **Init Vite**: In `apps/client`, ensure Vite + React + TS is setup.
-- [ ] **Dependencies**: `npm install @babylonjs/core @babylonjs/react zustand`.
-- [ ] **Shared Types**: Add `"shared-types": "workspace:*"` to `package.json`.
-- [ ] **Layout**: Implement "Toggle Mode" for focus:
+- [x] **Init Vite**: In `apps/client`, ensure Vite + React + TS is setup.
+- [x] **Dependencies**: `npm install @babylonjs/core @babylonjs/loaders zustand`.
+- [x] **Shared Types**: Add `"shared-types": "workspace:*"` to `package.json`.
+- [x] **Layout**: Implement "Toggle Mode" for focus:
     - **Editor Mode**: Full-screen Monaco Editor.
     - **Game Mode**: Full-screen Babylon Canvas.
     - **Split Mode**: Optional 50/50 split for large screens.
@@ -14,17 +14,18 @@
         - "Complexity Meter" placeholder (Rule Budget gauge).
         - "Policy Preview" panel (JSON/DSL placeholder).
         - "Rules Fired" timeline placeholder.
+    - **Note**: Monaco editor integration is pending; textarea placeholder used for Phase 0/1 scaffold.
 
 ## 2. 2.5D Camera Rig
-- [ ] **Scene Component**: Create `components/GameScene.tsx`.
-- [ ] **Camera**: Implement `ArcRotateCamera` (Orthographic).
+- [x] **Scene Component**: Create `components/GameScene.tsx`.
+- [x] **Camera**: Implement `ArcRotateCamera` (Orthographic).
     - Lock rotation to 45 degrees for isometric view.
     - Disable user rotation (fixed angle).
 
 ## 3. Hex Grid Rendering
-- [ ] **Mesh Builder**: Create `systems/HexGrid.ts`.
-- [ ] **Coordinates**: Use shared `Hex` definitions (or replicate logic locally).
-- [ ] **Instancing**: Render 20x20 grid of Hex meshes.
+- [x] **Mesh Builder**: Create `systems/HexGrid.ts`.
+- [x] **Coordinates**: Use shared `Hex` definitions (or replicate logic locally).
+- [x] **Instancing**: Render 20x20 grid of Hex meshes.
     - Use efficient `ThinInstance` for performance.
 
 ## 4. Asset Pipeline

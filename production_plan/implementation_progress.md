@@ -50,6 +50,9 @@ This document tracks the high-level completion status of the project. It must be
 *   **2026-01-31**: Added Phase 0 hex-grid visual map preview plus VP breakdown and deterministic turn log panels.
 *   **2026-01-31**: Added Phase 0 single-faction content data (Abrim, units, buildings) and wired sim costs/yields to it.
 *   **2026-01-31**: Fixed client dev import of `shared-types` by aliasing the source module for Vite/TS.
+*   **2026-01-31**: Added Babylon-based GameScene with orthographic camera and thin-instanced hex grid, plus Phase 1 visual foundation checklist updates.
+*   **2026-01-31**: Added game-engine scaffold entrypoint and forced external linking for simulation dev to avoid macOS LC_UUID errors.
+*   **2026-01-31**: Removed invalid `@babylonjs/react` dependency and aligned Phase 1 dependency list to installed packages.
 
 ## Technical Debt & Constraints
 *   **Prisma Generation**: Client is generated to `src/generated/client` instead of `node_modules`. This is a workaround for Monorepo/NestJS build issues. Long-term fix required.

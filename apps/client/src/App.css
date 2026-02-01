@@ -428,9 +428,10 @@
   position: relative;
 }
 
-.game-scene__svg {
+.game-scene__canvas {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
 .game-scene__legend {
