@@ -29,7 +29,8 @@
     - Use efficient `ThinInstance` for performance.
 
 ## 4. Asset Pipeline
-- [ ] **Import**: Add KayKit assets to `apps/client/public/assets`.
+- [x] **Import**: Add KayKit assets to `apps/client/public/assets`.
+    - **Note**: Packs are downloaded locally (see `apps/client/public/assets/README.md`).
 - [x] **GLTF Loader**: Use `@babylonjs/loaders`.
 - [x] **Decorators**: Randomly place Trees/Rocks on "Forest" or "Mountain" tiles.
-    - **Note**: Using primitive placeholders until KayKit assets are added.
+    - **Note**: Uses primitives unless `apps/client/public/assets/manifest.json` points to models.

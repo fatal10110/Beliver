@@ -64,3 +64,9 @@ tmp/
 temp/
 .agent/
 artifacts/
+
+# Local-only assets
+apps/client/public/assets/kaykit/
+!apps/client/public/assets/kaykit/.gitkeep
+apps/client/public/assets/kenney/
+!apps/client/public/assets/kenney/.gitkeep

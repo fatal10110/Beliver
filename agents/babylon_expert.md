@@ -19,6 +19,7 @@ You are a **Senior Babylon.js Engineer** with deep experience shipping 3D games 
 *   **Thin Instances**: Base mesh must remain visible or a visible instance must be guaranteed.
 *   **Bounds/Culling**: Refresh bounding info after instance buffers change.
 *   **Visibility Sanity**: At least one terrain tile and one unit must be visible in a default seed.
+*   **Asset Manifest**: Verify GLB assets load from the manifest (no fallback-only view); check for disabled-parent meshes or missing textures.
 *   **State Updates**: Per-turn or per-tick updates must change mesh transforms.
 *   **Overlap Guard**: Units should not spawn on the same hex without a visual offset.
 *   **Camera Framing**: Grid should fill the viewport; tiny clusters in a large black field indicate scale/target issues.

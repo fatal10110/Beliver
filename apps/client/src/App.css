@@ -570,6 +570,25 @@
   background: #4a8a88;
 }
 
+.game-scene__asset-status {
+  position: absolute;
+  bottom: 52px;
+  left: 12px;
+  display: flex;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(18, 16, 12, 0.6);
+  color: #f7f1e6;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.game-scene__asset-status span:last-child {
+  color: #f1c27b;
+}
+
 .game-stage__hint {
   font-size: 0.85rem;
   color: var(--color-ink-muted);

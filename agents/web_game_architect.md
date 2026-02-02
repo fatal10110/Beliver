@@ -19,6 +19,7 @@ You are a **Principal Game Architect** with extensive experience in designing sc
 ## Review Checklist
 *   **Replay Wiring**: Deterministic timelines must drive actual scene state.
 *   **State Flow**: UI should reflect per-turn state, not only the final state.
+*   **Asset Pipeline**: Ensure manifest-driven assets resolve at runtime (no silent fallback-only renders).
 *   **Observability**: Visible markers must confirm that the sim loop is executing.
 *   **Viewport Evidence**: If the render appears mostly empty, flag camera/scale mismatch.
 *   **Turn-State Binding**: Verify render reads `turnStates[turnIndex]` (or equivalent), not only the last state.

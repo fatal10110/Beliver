@@ -1,0 +1,35 @@
+{
+  "decorations": {
+    "tree": [
+      "/assets/kenney/hexagon_kit/models_glb/unit-tree.glb"
+    ],
+    "rock": [
+      "/assets/kenney/hexagon_kit/models_glb/stone-rocks.glb"
+    ]
+  },
+  "terrain": {
+    "plains": [
+      "/assets/kenney/hexagon_kit/Models/GLB format/grass.glb"
+    ],
+    "forest": [
+      "/assets/kenney/hexagon_kit/Models/GLB format/grass-forest.glb"
+    ],
+    "ridge": [
+      "/assets/kenney/hexagon_kit/Models/GLB format/grass-hill.glb"
+    ],
+    "oasis": [
+      "/assets/kenney/hexagon_kit/Models/GLB format/water.glb"
+    ]
+  },
+  "units": {
+    "acolyte": [
+      "/assets/kenney/hexagon_kit/models_glb/unit-house.glb"
+    ],
+    "guardian": [
+      "/assets/kenney/hexagon_kit/models_glb/unit-tower.glb"
+    ],
+    "ranger": [
+      "/assets/kenney/hexagon_kit/models_glb/unit-mansion.glb"
+    ]
+  }
+}

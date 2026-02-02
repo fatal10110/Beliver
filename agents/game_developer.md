@@ -24,6 +24,7 @@ You are a **Senior Web Game Developer** and **Graphics Engineer** with deep expe
 
 ## Review Checklist
 *   **Visible Delta**: Any simulation change must have an obvious visual cue (movement, pulse, or new marker).
+*   **Asset Health**: Confirm manifest-driven assets render (not only primitive fallbacks). If a status HUD exists, verify it shows all assets loaded.
 *   **Spawn Offsets**: New units should not overlap unless intentionally stacked with a marker offset.
 *   **Playback Wiring**: Replay controls must drive scene updates, not just UI text.
 *   **Scale Readability**: Unit markers must be large enough to read at the default camera distance.
